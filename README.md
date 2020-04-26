@@ -1,4 +1,11 @@
-# COVID-19 Expectations Data
+---
+title: "Uncertainty in times of COVID-19 [dataset]"
+author: "Fabian Lange, Lars Vilhuber"
+date: "2020-04-27"
+---
+
+
+# Expectations about Continuation of Social Distancing Rules in COVID-19 Times
 
 Data from a survey of consumer expectations
 
@@ -8,9 +15,59 @@ From April 24, 2020, Fabian Lange and Lars Vilhuber will conduct the survey "Unc
 
 We believe that this information is not otherwise available in a reliable and timely fashion. The information should be usable by policy-makers and researchers, to be included in models of future developments of society and the economy.
 
+### Citation
+
+Please cite the data as 
+
+> Lange, Fabian and Lars Vilhuber. 2020. "Expectations about Continuation of Social Distancing Rules in COVID-19 Times [dataset]." (this URL)
+
+We will be posting the data on Zenodo shortly. Data should be cite via DOI then.
+
 ### Reference period
 
-The survey asks about point-in-time expectations. A new wave is launched every Friday.
+The survey asks about point-in-time expectations. A new wave is launched every Friday. The list below provides the dates of collection for each wave.
+
+(LIST TO BE DERIVED FROM DATA)
+
+## Data description
+
+|  Topic | Answer |
+|--------|--------|
+| Geographic Coverage | United States of America, Canada |
+| Time  Periods | 2020-04-24 - TO BE FILLED |
+| Date of Collection | 2020-04-24 - TO BE FILLED |
+| Unit of Observation | Individual |
+| Description of Variables | Response to question, gender, age, geography, weight |
+
+### Data Dictionary
+
+#### Q1: Answer to primary question
+
+This field will differ across the two types of files.
+
+(TO BE FILLED OUT)
+
+#### Age
+
+(TO BD FILLED OUT)
+
+#### Gender
+
+(TO BE FILLED OUT)
+
+#### Geography
+
+Geography is as coded by Google Surveys. Precision may vary.
+
+(TO BE FILLED OUT)
+
+#### Weight
+
+(TO BE FILLED OUT)
+
+### Data format
+
+Native format is Excel (XLSX). Files are provided as downloaded from Google Surveys.
 
 ## Data sources and methodology
 
@@ -35,6 +92,10 @@ Five response choices are offered:
 - "more than 6 months". 
 
 An additional answer allows respondents to affirm that "such measures are not implemented in their province/state". See [questionnaires.md] for visual representation of the questions. 
+
+
+<img src="questionnaires/Screenshot_Survey1_consumer.png" width="200px" />
+<img src="questionnaires/Screenshot_Survey2_closures.png" width="200px" />
 
 ### Data collection
 
