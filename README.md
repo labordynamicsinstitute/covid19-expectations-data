@@ -1,4 +1,5 @@
-# covid19-expectations-data
+# COVID-19 Expectations Data
+
 Data from a survey of consumer expectations
 
 ## Description
