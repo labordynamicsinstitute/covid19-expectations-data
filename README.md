@@ -65,9 +65,38 @@ Geography is as coded by Google Surveys. Precision may vary.
 
 (TO BE FILLED OUT)
 
+### Data structure
+
+Data files are available for each completed cycle of the survey, in general once a week, and are stored under [`final`](final/). Data from the preliminary study (assessing the questionnaire design) is stored under [`preliminary`](preliminary/). We may make available data before the survey is completed for each cycle, under [`temporary`](temporary/), however, once the final version from that cycle is available, these are deleted (this directory will be empty on Zenodo).
+
+
 ### Data format
 
-Native format is Excel (XLSX). Files are provided as downloaded from Google Surveys.
+Native format is Excel (XLSX). Filenames in [`final`](final/) are tagged with geography, language, the question type,and date downloaded:
+
+> `survey-[geography]-[language]-[question]-[date].xlsx`
+
+[`Temporary`](temporary/) files follow
+
+> `survey-[surveyid].xlsx`
+
+Files are provided as downloaded from Google Surveys. Each file has 4 tabs.
+
+#### Overview
+
+Lists the questions asked by the client, in this case Lange and Vilhuber, as well as a survey ID.
+
+#### Topline
+
+This tab contains a weighted summary of the responses to the questions (similar to the above summary). 
+
+#### Complete responses
+
+This tab contains the actual microdata for any complete responses. Note that for a single-question survey, this is identical to the "All responses". A complete response might have a weight of zero.
+
+#### All responses
+
+All responses, whether complete or not, are recorded on this tab. In the case of a single-question survey, this is identical to the "Complete responses" tab.
 
 ## Data sources and methodology
 
