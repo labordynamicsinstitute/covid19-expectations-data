@@ -1,0 +1,275 @@
+---
+title: "Uncertainty in times of COVID-19: Choosing whether to ask 1 or 2 questions"
+author: "Fabian Lange, Lars Vilhuber"
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    keep_md: yes
+    self_contained: no
+    toc: yes
+    toc_float: yes
+    df_print: paged
+    lib_dir: libs
+  pdf_document:
+    toc: yes
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+```{r config_libs,include=FALSE,message=FALSE,cache=FALSE}
+# note this file needs to be run in its own repository checkout.
+source(file.path(rprojroot::find_root(rprojroot::has_file("pathconfig.R")),"pathconfig.R"),echo=TRUE)
+source(file.path(programs,"global-libraries.R"),echo=TRUE)
+source(file.path(programs,"config.R"),echo=TRUE)
+
+test.question.date <- "20200412"
+prelim.question.date <- "20200421" # date we downloaded the final results from the test.
+
+planned.n = 250 
+
+
+# file names (no path)
+gcsresults <- "gcs_results"
+gcsprelim.results <- paste0(gcsresults,test.question.date)
+gcsprelim.list <- "gcs_prelim_list"
+gcsprelim.final.results <- paste0(gcsresults,prelim.question.date)
+gcsprelim.final.list <- "gcs_prelim_final_list"
+
+```
+## Purpose
+
+We fielded three questions regarding uncertainty in the April 2020 COVID-19 situation in Canada. Goal is to select either a two-question survey, using different questions for employment and consumer behavior, or a composite question that encompasses both. The question is whether answers between the two-question version differ between questions. The composite question was asked as a control. 
+
+
+
+```{r read_list,include=FALSE,cache=FALSE}
+# Compile all the worksheets 
+gcsdir_prelim <- file.path(gcsdir,"preliminary")
+ws <- 
+  enframe(list.files(gcsdir_prelim,"*.xlsx")) %>% 
+  mutate(filename=value,path=gcsdir_prelim) %>%
+  separate(value,c("drop","tag","date","time"),sep="-") %>%
+  separate(time,c("time"),extra = "drop") %>% 
+  filter(date==prelim.question.date) %>%
+  select(-drop,-name)
+
+for ( x in 1:nrow(ws) ) {
+  filename=as.character(ws[x,"filename"])
+  path=as.character(ws[x,"path"])
+  if ( file.exists(file.path(path,filename )) ) {
+    print(paste("Processing: ", filename))
+    if ( x == 1 ) {
+      # Read in the first list and set variable types
+      results <- read_excel(file.path(path,filename),
+                            sheet = "Complete responses")
+      results$tag <- as.character(ws[x,"tag"])
+      results$date <- as.character(ws[x,"date"])
+    } else {
+      # Read in the subsequent lists and set variable types
+      tmp <- read_excel(file.path(path,filename),
+                            sheet = "Complete responses")
+      tmp$tag <- as.character(ws[x,"tag"])
+      tmp$date <- as.character(ws[x,"date"])
+      # Add to master dataframe
+      results <- bind_rows(results,tmp)
+      rm(tmp)
+    }
+  }
+}
+# clean up a bit
+results %>% 
+  rename(Q1 = `Question #1 Answer`) %>%
+  rename(rt_Q1_ms = `Response Time #1 (ms)` ) %>%
+  mutate(Q1 = factor(Q1,levels=c("less than 1 month","1-2 months","2-3 months","3-6 months","more than 6 months","My province has not implemented such rules."))) -> results.final
+#mysave(results.final,gcsresults)
+
+if (file.exists(file.path(outputs,paste0(gcsprelim.final.results,".Rds")))) {
+  print("Not overwriting existing file.")
+} else {
+  results.final %>% filter(tag==prelim.question.date) -> results.prelim
+  mysave(results.prelim,gcsprelim.final.results)
+  mysave(ws,gcsprelim.final.list)
+}
+# end of else
+
+# get metadata 
+results.final %>% summarize(begintime=min(`Time (UTC)`),endtime=max(`Time (UTC)`)) %>%
+  mutate(begindate=as.Date(begintime),enddate=as.Date(endtime)) -> dates.final
+dates.final.begin <- pull(dates.final,begindate)
+dates.final.end <- pull(dates.final,enddate)
+```
+
+## Sources
+
+We [pre-registered](https://osf.io/729nr) the decision based on preliminary data collected after the first day of fielding the question (on `r test.question.date`). The decision about choice of the question, as well as preliminary descriptive results, are  based on data collected over the entire test time period, with a target n of `r planned.n` per question. We collected data from `r dates.final.begin` to `r dates.final.end` across Canada, achieving a total n=`r nrow(results.final)`.
+
+The data was manually downloaded from the Google Consumer Survey site on `r prelim.question.date`, and saved, using the  naming convention `tag-YYYYMMDD-HHMM.xlsx`. Data are available in our Github repository.
+
+## Fielded questions
+
+We fielded three questions in the test sample:
+
+- How much longer do you expect social distancing rules (restrictions on gatherings, stay-at-home rules) to stay in place in your province?
+- How much longer do you expect the closure of non-essential businesses to stay in place in your province?
+- How much longer do you expect social distancing rules (restrictions on gatherings, closure of non-essential businesses, stay-at-home rules) to stay in place in your province?
+
+For each question, we collected responses on a Likert scale with text: "less than 1 month", "1-2 months", "2-3 months", "3-6 months", "more than 6 months", and a response equivalent to "does not apply" ("My province has not implemented such rules.").
+
+<img src="../assets/Screenshot_Survey1_consumer.png" width="200px" />
+<img src="../assets/Screenshot_Survey2_closures.png" width="200px" />
+<img src="../assets/Screenshot_Survey3_composite.png" width="200px" />
+
+## First results
+
+Total observation by tag / question:
+
+```{r summarize}
+results.final %>% group_by(tag,date) %>%
+  summarise(count=n()) %>%
+  kable()
+```
+
+Distribution of responses:
+
+```{r details, results="asis"}
+results.final %>% group_by(tag,Q1) %>%
+  summarise(count=n()) %>% 
+  group_by(tag) %>%
+  mutate(percent = count / sum(count)) -> tmp
+tags <- c("business","composite","people")
+print.part <- function(tagselect) {
+  tmp %>% filter(tag==tagselect) %>% 
+    mutate(percent = round(percent*100,2)) %>%
+  kable() %>%
+  return()
+}
+lapply(as.list(tags), print.part)
+#htmltools::tagList(lapply(as.list(tags), print.part))
+```
+
+## Do the different questions yield different responses?
+
+### Visually
+
+```{r graph, echo=FALSE}
+results.final %>% 
+  ggplot(aes(Q1,color=tag,fill=tag)) +
+  geom_histogram(stat="count",position="dodge",aes(label=..count..)) +
+  theme_minimal() +
+  scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2") +
+  ylab(element_blank())+
+  xlab(element_blank())+
+  coord_flip()
+```
+
+### Kolmogorov-Smirnov Test
+
+```{r kstest,echo=FALSE}
+# Do a K-S test
+# https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test
+results.final %>% group_by(tag,Q1) %>%
+  summarize(count=n()) -> results.q1.distribution
+hist.business <- results.q1.distribution %>% filter(tag=="business") %>% pull(count) 
+hist.people <- results.q1.distribution %>% filter(tag=="people") %>% pull(count)
+hist.composite <- results.q1.distribution %>% filter(tag=="composite") %>% pull(count)
+
+sqrt = sqrt((sum(hist.business) + sum(hist.people))/(sum(hist.business)*sum(hist.people)))
+sqrt.final = sqrt( (planned.n + planned.n)/(planned.n*planned.n))
+
+calpha = 1.358
+pwr.alpha = 0.05
+
+
+ks.result <- dgof::ks.test(hist.business , hist.people,simulate.p.value = TRUE,B=1000)
+ks.result
+
+```
+
+In the Kolmogorov-Smirnov test, the entire (cumulative) distribution is tested for equality. The hypothesis of equality of distributions 
+is rejected when the test statistic $D$  is larger than $c(\alpha) \sqrt{\frac{n+m}{n*m}}$ where $n$ and $m$ are the sample sizes. 
+
+For the full test data, $n=$ `r sum(hist.business)` and $m=$ `r sum(hist.people)`, the square root evaluates to `r sqrt`. The test statistic $D=$ `r ks.result$statistic`, with a p-value of `r ks.result$p.value`. Based on the KS test, `r if ( ks.result$statistic > sqrt * calpha ) { "we thus "} else { "we cannot " }` reject the hypothesis of equality of distributions.
+
+
+
+### Single-dimensional test
+
+```{r fraction12, include=FALSE}
+n.business <- sum(hist.business)
+n.people <- sum(hist.people)
+q1.r2.business <- results.q1.distribution %>% filter(tag=="business",Q1=="1-2 months") %>% pull(count)
+q1.r2.people <- results.q1.distribution %>% filter(tag=="people",Q1=="1-2 months") %>% pull(count)
+q1.r2.pct.business <- q1.r2.business/n.business
+q1.r2.pct.people <- q1.r2.people/n.people
+
+q1.r5.business <- results.q1.distribution %>% filter(tag=="business",Q1=="more than 6 months") %>% pull(count)
+q1.r5.people <- results.q1.distribution %>% filter(tag=="people",Q1=="more than 6 months") %>% pull(count)
+q1.r5.pct.business <- q1.r5.business/n.business
+q1.r5.pct.people <- q1.r5.people/n.people
+
+# overall proportion 
+p.r2 = ( q1.r2.pct.business * n.business + q1.r2.pct.people * n.people )/ ( n.business + n.people ) 
+q.r2 = 1 - p.r2
+
+q1.r2.zscore <- ( q1.r2.pct.people  - q1.r2.pct.business  )/ sqrt( p.r2*q.r2/ n.business + p.r2*q.r2/n.people )
+
+# or all in one
+
+q1.r2.ztest <- prop.test(c(q1.r2.business,q1.r2.people),c(n.business,n.people))
+q1.r5.ztest <- prop.test(c(q1.r5.business,q1.r5.people),c(n.business,n.people))
+q1.r2.ztest
+```
+
+Alternatively, we can compute a $z$-test for the  proportion responding to Q1 with "1-2 months", with the remaining fractions collapsed to an "other" category. For the test sample, these numbers are `r q1.r2.pct.business * 100` percent for the `business`  version, and `r q1.r2.pct.people * 100` percent for the `people` version. The $\chi^2$ statistic has a value of `r q1.r2.ztest$statistic` and a p-value of `r q1.r2.ztest$p.value`. Based on the $z$-test, we `r if ( q1.r2.ztest$p.value < pwr.alpha ) { "thus "} else { "cannot " }` reject the hypothesis of equality of responses to Q1. For the (non-pre-registered) comparison of the fraction responding with "more than 6 months", the $\chi^2$ statistic has a value of `r q1.r5.ztest$statistic` and a p-value of `r q1.r5.ztest$p.value`.
+```{r powercalc, include=TRUE}
+d=round(q1.r2.pct.business,0)
+power <- pwr.2p.test(n=n.business,h=d,sig.level=pwr.alpha)
+```
+The test has power of `r power$power` for the sample size n=`r n.business` and effect size `r round(q1.r5.pct.business * 100,2)` at $\alpha =$ `r pwr.alpha`.
+
+### Fisher's exact test
+
+```{r fisher_test}
+fisher.result <- fisher.test(hist.business,hist.people,simulate.p.value = TRUE, B = 10000)
+fisher.result
+```
+We can also use Fisher's exact test to assess whether the two distributions are different. The null hypothesis is that the rows *and* columns of the two histograms are independent (i.e., the two distributions are different).
+Fisher's test when applied to the test sample gives a p-value of `r fisher.result$p.value`, so the null that the two distributions are different  `r if ( fisher.result$p.value > pwr.alpha ) { "should be "} else { "cannot be" }` rejected.
+
+### $\chi^2$ test
+
+```{r xi_squared}
+x2.result <- chisq.test(hist.business,hist.people,simulate.p.value = TRUE, B = 10000)
+x2.result
+```
+
+Finally, a $\chi^2$ test of independence of distributions yields a test statistic of `r x2.result$statistic` and a p-value of `r x2.result$p.value`, `r if ( x2.result$p.value < pwr.alpha ) { "rejecting "} else { "not rejecting" }` the null that the two histograms are different.
+
+
+
+## Decision
+We will use one composite question if the two variants (`business` and `people`) are not statistically different in our test sample, according to the majority of tests.
+
+---
+
+## Appendix
+
+### Data locations
+
+Permanent data is in
+
+> `r clean`
+
+and should be committed to the repository.
+
+Temporary data is in
+
+> `r interwrk`
+
+and can (should) be deleted after completion.
