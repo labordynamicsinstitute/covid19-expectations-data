@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Fabian Lange, Lars Vilhuber" />
+
+<meta name="date" content="2020-04-28" />
+
+<title>Uncertainty in times of COVID-19: Choosing whether to ask 1 or 2 questions</title>
+
+<script src="libs/jquery-1.12.4/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="libs/pagedtable-1.1/js/pagedtable.js"></script>
+<script src="libs/htmlwidgets-1.5.1/htmlwidgets.js"></script>
+<link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="libs/datatables-binding-0.13/datatables.js"></script>
+<link href="libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="libs/crosstalk-1.1.0.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.0.1/js/crosstalk.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Uncertainty in times of COVID-19: Choosing whether to ask 1 or 2 questions</h1>
+<h4 class="author">Fabian Lange, Lars Vilhuber</h4>
+<h4 class="date">2020-04-28</h4>
+
+</div>
+
+
+<div id="purpose" class="section level2">
+<h2>Purpose</h2>
+<p>We fielded three questions regarding uncertainty in the April 2020 COVID-19 situation in Canada. Goal is to select either a two-question survey, using different questions for employment and consumer behavior, or a composite question that encompasses both. The question is whether answers between the two-question version differ between questions. The composite question was asked as a control.</p>
+</div>
+<div id="sources" class="section level2 tabset tabset-fade">
+<h2>Sources</h2>
+<p>We <a href="https://osf.io/729nr">pre-registered</a> the decision based on <strong>preliminary data</strong> collected after the first day of fielding the question (on 20200421). The decision about choice of the question, as well as preliminary descriptive results, are based on <strong>test data</strong> collected over the entire test time period, with a target n of 250 per question. We collected data from 2020-04-12 to 2020-04-17 across Canada, achieving a total <em>n</em>=753.</p>
+<p>The data was manually downloaded from the Google Consumer Survey site on 20200412, and saved, using the naming convention <code>tag-YYYYMMDD-HHMM.xlsx</code>. Data used for both the original design and the full test time period are available in this archive.</p>
+<div id="preliminary-data-files" class="section level3">
+<h3>Preliminary data files</h3>
+<div id="htmlwidget-419be8a7575bf547dd4a" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-419be8a7575bf547dd4a">{"x":{"filter":"none","autoHideNavigation":true,"data":[["1","2","3"],["preliminary/survey-business-20200412-1044.xlsx","preliminary/survey-composite-20200412-1044.xlsx","preliminary/survey-people-20200412-1044.xlsx"],["20200412","20200412","20200412"],["1044","1044","1044"],["business","composite","people"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Preliminary files<\/th>\n      <th>date<\/th>\n      <th>time<\/th>\n      <th>tag<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="test-data-files" class="section level3">
+<h3>Test data files</h3>
+<div id="htmlwidget-429e4ddd915e7ef39ee4" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-429e4ddd915e7ef39ee4">{"x":{"filter":"none","autoHideNavigation":true,"data":[["1","2","3"],["preliminary/survey-business-20200421-1520.xlsx","preliminary/survey-composite-20200421-1520.xlsx","preliminary/survey-people-20200421-1520.xlsx"],["20200421","20200421","20200421"],["1520","1520","1520"],["business","composite","people"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Preliminary files<\/th>\n      <th>date<\/th>\n      <th>time<\/th>\n      <th>tag<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div id="fielded-questions" class="section level2">
+<h2>Fielded questions</h2>
+<p>We fielded three questions in the test sample:</p>
+<ul>
+<li>How much longer do you expect social distancing rules (restrictions on gatherings, stay-at-home rules) to stay in place in your province?</li>
+<li>How much longer do you expect the closure of non-essential businesses to stay in place in your province?</li>
+<li>How much longer do you expect social distancing rules (restrictions on gatherings, closure of non-essential businesses, stay-at-home rules) to stay in place in your province?</li>
+</ul>
+<p>For each question, we collected responses on a Likert scale with text: “less than 1 month”, “1-2 months”, “2-3 months”, “3-6 months”, “more than 6 months”, and a response equivalent to “does not apply” (“My province has not implemented such rules.”).</p>
+<p><img src="questionnaires/Screenshot_Survey1_consumer.png" width="200px" /> <img src="questionnaires/Screenshot_Survey2_closures.png" width="200px" /> <img src="questionnaires/Screenshot_Survey3_composite.png" width="200px" /></p>
+</div>
+<div id="first-results" class="section level2 tabset tabset-fade">
+<h2>First results</h2>
+<div id="total-observation-by-tag-question" class="section level3">
+<h3>Total observation by tag / question</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">tag</th>
+<th align="left">date</th>
+<th align="right">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">business</td>
+<td align="left">20200421</td>
+<td align="right">251</td>
+</tr>
+<tr class="even">
+<td align="left">composite</td>
+<td align="left">20200421</td>
+<td align="right">251</td>
+</tr>
+<tr class="odd">
+<td align="left">people</td>
+<td align="left">20200421</td>
+<td align="right">251</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="responses-to-question-1" class="section level3">
+<h3>Responses to Question 1</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Q1</th>
+<th align="right">count</th>
+<th align="right">percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">less than 1 month</td>
+<td align="right">25</td>
+<td align="right">9.96</td>
+</tr>
+<tr class="even">
+<td align="left">1-2 months</td>
+<td align="right">77</td>
+<td align="right">30.68</td>
+</tr>
+<tr class="odd">
+<td align="left">2-3 months</td>
+<td align="right">55</td>
+<td align="right">21.91</td>
+</tr>
+<tr class="even">
+<td align="left">3-6 months</td>
+<td align="right">39</td>
+<td align="right">15.54</td>
+</tr>
+<tr class="odd">
+<td align="left">more than 6 months</td>
+<td align="right">37</td>
+<td align="right">14.74</td>
+</tr>
+<tr class="even">
+<td align="left">My province has not implemented such rules.</td>
+<td align="right">18</td>
+<td align="right">7.17</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="responses-to-question-2" class="section level3">
+<h3>Responses to Question 2</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Q1</th>
+<th align="right">count</th>
+<th align="right">percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">less than 1 month</td>
+<td align="right">28</td>
+<td align="right">11.16</td>
+</tr>
+<tr class="even">
+<td align="left">1-2 months</td>
+<td align="right">74</td>
+<td align="right">29.48</td>
+</tr>
+<tr class="odd">
+<td align="left">2-3 months</td>
+<td align="right">54</td>
+<td align="right">21.51</td>
+</tr>
+<tr class="even">
+<td align="left">3-6 months</td>
+<td align="right">44</td>
+<td align="right">17.53</td>
+</tr>
+<tr class="odd">
+<td align="left">more than 6 months</td>
+<td align="right">24</td>
+<td align="right">9.56</td>
+</tr>
+<tr class="even">
+<td align="left">My province has not implemented such rules.</td>
+<td align="right">27</td>
+<td align="right">10.76</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="responses-to-question-3" class="section level3">
+<h3>Responses to Question 3</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Q1</th>
+<th align="right">count</th>
+<th align="right">percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">less than 1 month</td>
+<td align="right">24</td>
+<td align="right">9.56</td>
+</tr>
+<tr class="even">
+<td align="left">1-2 months</td>
+<td align="right">69</td>
+<td align="right">27.49</td>
+</tr>
+<tr class="odd">
+<td align="left">2-3 months</td>
+<td align="right">55</td>
+<td align="right">21.91</td>
+</tr>
+<tr class="even">
+<td align="left">3-6 months</td>
+<td align="right">38</td>
+<td align="right">15.14</td>
+</tr>
+<tr class="odd">
+<td align="left">more than 6 months</td>
+<td align="right">37</td>
+<td align="right">14.74</td>
+</tr>
+<tr class="even">
+<td align="left">My province has not implemented such rules.</td>
+<td align="right">28</td>
+<td align="right">11.16</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="do-the-different-questions-yield-different-responses" class="section level2 tabset tabset-fade">
+<h2>Do the different questions yield different responses?</h2>
+<div id="visually" class="section level3">
+<h3>Visually</h3>
+<p><img src="evaluation_files/figure-html/graph-1.png" /><!-- --></p>
+</div>
+<div id="kolmogorov-smirnov-test" class="section level3">
+<h3>Kolmogorov-Smirnov Test</h3>
+<pre><code>## 
+##  Two-sample Kolmogorov-Smirnov test
+## 
+## data:  hist.business and hist.people
+## D = 0.16667, p-value = 1
+## alternative hypothesis: two-sided</code></pre>
+<p>In the Kolmogorov-Smirnov test, the entire (cumulative) distribution is tested for equality. The hypothesis of equality of distributions is rejected when the test statistic <span class="math inline">\(D\)</span> is larger than <span class="math inline">\(c(\alpha) \sqrt{\frac{n+m}{n*m}}\)</span> where <span class="math inline">\(n\)</span> and <span class="math inline">\(m\)</span> are the sample sizes.</p>
+<p>For the full test data, <span class="math inline">\(n=\)</span> 251 and <span class="math inline">\(m=\)</span> 251, the square root evaluates to 0.0892644. The test statistic <span class="math inline">\(D=\)</span> 0.1666667, with a p-value of 1. Based on the KS test, we thus reject the hypothesis of equality of distributions.</p>
+</div>
+<div id="single-dimensional-test" class="section level3">
+<h3>Single-dimensional test</h3>
+<p>Alternatively, we can compute a <span class="math inline">\(z\)</span>-test for the proportion responding to Q1 with “1-2 months”, with the remaining fractions collapsed to an “other” category. For the test sample, these numbers are 29.4820717 percent for the <code>business</code> version, and 30.6772908 percent for the <code>people</code> version. The <span class="math inline">\(\chi^2\)</span> statistic has a value of 0.0378861 and a p-value of 0.8456721. Based on the <span class="math inline">\(z\)</span>-test, we cannot reject the hypothesis of equality of responses to Q1. For the (non-pre-registered) comparison of the fraction responding with “more than 6 months”, the <span class="math inline">\(\chi^2\)</span> statistic has a value of 2.6871863 and a p-value of 0.1011583.</p>
+<p>The test has power of 0.05 for the sample size n=251 and effect size 9.56 at <span class="math inline">\(\alpha =\)</span> 0.05.</p>
+</div>
+<div id="fishers-exact-test" class="section level3">
+<h3>Fisher’s exact test</h3>
+<pre><code>## 
+##  Fisher&#39;s Exact Test for Count Data with simulated p-value (based on
+##  10000 replicates)
+## 
+## data:  hist.business and hist.people
+## p-value = 1
+## alternative hypothesis: two.sided</code></pre>
+<p>We can also use Fisher’s exact test to assess whether the two distributions are different. The null hypothesis is that the rows <em>and</em> columns of the two histograms are independent (i.e., the two distributions are different). Fisher’s test when applied to the test sample gives a p-value of 1, so the null that the two distributions are different should be rejected.</p>
+</div>
+<div id="chi2-test" class="section level3">
+<h3><span class="math inline">\(\chi^2\)</span> test</h3>
+<pre><code>## 
+##  Pearson&#39;s Chi-squared test with simulated p-value (based on 10000
+##  replicates)
+## 
+## data:  hist.business and hist.people
+## X-squared = 30, df = NA, p-value = 1</code></pre>
+<p>Finally, a <span class="math inline">\(\chi^2\)</span> test of independence of distributions yields a test statistic of 30 and a p-value of 1, not rejecting the null that the two histograms are different.</p>
+</div>
+</div>
+<div id="decision-criterion" class="section level2">
+<h2>Decision Criterion</h2>
+<p>We will use one composite question if the two variants (<code>business</code> and <code>people</code>) are not statistically different in our test sample, according to the majority of tests.</p>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>Based on the observed data from the test data collected between 2020-04-12 and 2020-04-17 across Canada, we chose the two-question version.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

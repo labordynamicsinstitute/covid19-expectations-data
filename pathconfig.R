@@ -10,9 +10,10 @@ setwd(basepath)
 # Main directories
 raw <- file.path(basepath, "final")
 temporary <- file.path(basepath, "temporary")
-prelim <- file.path(basebath,"preliminary")
+prelim <- file.path(basepath,"preliminary")
 interwrk <- file.path(basepath, "_scratch")
 programs <- file.path(basepath,"_programs")
+outputs <- interwrk
 
 gcsdir <- file.path(raw)
 

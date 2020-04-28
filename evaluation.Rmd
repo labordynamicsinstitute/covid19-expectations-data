@@ -2,6 +2,7 @@
 title: "Uncertainty in times of COVID-19: Choosing whether to ask 1 or 2 questions"
 author: "Fabian Lange, Lars Vilhuber"
 date: "`r Sys.Date()`"
+always_allow_html: true
 output:
   html_document: 
     keep_md: yes
@@ -27,18 +28,16 @@ source(file.path(rprojroot::find_root(rprojroot::has_file("pathconfig.R")),"path
 source(file.path(programs,"global-libraries.R"),echo=TRUE)
 source(file.path(programs,"config.R"),echo=TRUE)
 
-test.question.date <- "20200412"
-prelim.question.date <- "20200421" # date we downloaded the final results from the test.
+prelim.question.date <- "20200412"
+test.question.date <- "20200421" # date we downloaded the final results from the test.
 
 planned.n = 250 
 
 
 # file names (no path)
 gcsresults <- "gcs_results"
-gcsprelim.results <- paste0(gcsresults,test.question.date)
-gcsprelim.list <- "gcs_prelim_list"
-gcsprelim.final.results <- paste0(gcsresults,prelim.question.date)
-gcsprelim.final.list <- "gcs_prelim_final_list"
+gcsprelim.test.results <- paste0(gcsresults,test.question.date)
+gcsprelim.test.list <- "gcs_prelim_final_list"
 
 ```
 ## Purpose
@@ -49,14 +48,17 @@ We fielded three questions regarding uncertainty in the April 2020 COVID-19 situ
 
 ```{r read_list,include=FALSE,cache=FALSE}
 # Compile all the worksheets 
-gcsdir_prelim <- file.path(gcsdir,"preliminary")
-ws <- 
+gcsdir_prelim <- prelim
+ws.full <- 
   enframe(list.files(gcsdir_prelim,"*.xlsx")) %>% 
   mutate(filename=value,path=gcsdir_prelim) %>%
   separate(value,c("drop","tag","date","time"),sep="-") %>%
   separate(time,c("time"),extra = "drop") %>% 
-  filter(date==prelim.question.date) %>%
   select(-drop,-name)
+ws.prelim <- ws.full %>% 
+  filter(date==prelim.question.date) 
+ws <- ws.full %>%
+  filter(date==test.question.date) 
 
 for ( x in 1:nrow(ws) ) {
   filename=as.character(ws[x,"filename"])
@@ -88,13 +90,6 @@ results %>%
   mutate(Q1 = factor(Q1,levels=c("less than 1 month","1-2 months","2-3 months","3-6 months","more than 6 months","My province has not implemented such rules."))) -> results.final
 #mysave(results.final,gcsresults)
 
-if (file.exists(file.path(outputs,paste0(gcsprelim.final.results,".Rds")))) {
-  print("Not overwriting existing file.")
-} else {
-  results.final %>% filter(tag==prelim.question.date) -> results.prelim
-  mysave(results.prelim,gcsprelim.final.results)
-  mysave(ws,gcsprelim.final.list)
-}
 # end of else
 
 # get metadata 
@@ -104,21 +99,30 @@ dates.final.begin <- pull(dates.final,begindate)
 dates.final.end <- pull(dates.final,enddate)
 ```
 
-## Sources
+## Sources {.tabset .tabset-fade}
 
-We [pre-registered](https://osf.io/729nr) the decision based on preliminary data collected after the first day of fielding the question (on `r test.question.date`). The decision about choice of the question, as well as preliminary descriptive results, are  based on data collected over the entire test time period, with a target n of `r planned.n` per question. We collected data from `r dates.final.begin` to `r dates.final.end` across Canada, achieving a total n=`r nrow(results.final)`.
+We [pre-registered](https://osf.io/729nr) the decision based on **preliminary data** collected after the first day of fielding the question (on `r test.question.date`). The decision about choice of the question, as well as preliminary descriptive results, are  based on **test data** collected over the entire test time period, with a target n of `r planned.n` per question. We collected data from `r dates.final.begin` to `r dates.final.end` across Canada, achieving a total *n*=`r nrow(results.final)`.
 
-The data was manually downloaded from the Google Consumer Survey site on `r prelim.question.date`, and saved, using the  naming convention `tag-YYYYMMDD-HHMM.xlsx`. Data used for both the original design and the full test time period are available in this archive:
+The data was manually downloaded from the Google Consumer Survey site on `r prelim.question.date`, and saved, using the  naming convention `tag-YYYYMMDD-HHMM.xlsx`. Data used for both the original design and the full test time period are available in this archive.
 
-```{r list_prelim_files,include=TRUE}
+### Preliminary data files
+
+```{r list_test_files,include=TRUE,results="asis"}
+ws.prelim %>% mutate(path=str_remove(path,paste0(basepath,"/")),
+              `Preliminary files` = file.path(path,filename)) %>%
+  select(`Preliminary files`,date,time,tag) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
+```
+
+### Test data files
+
+```{r list_prelim_files,include=TRUE,results="asis"}
 ws %>% mutate(path=str_remove(path,paste0(basepath,"/")),
-              fullpath = file.path(path,filename),
-              `Preliminary files`=paste0(quote('<a href="'),fullpath,quote('">'),fullpath,'</a>')) %>%
-  select(`Preliminary files`,date,time,tag) 
+              `Preliminary files` = file.path(path,filename)) %>%
+  select(`Preliminary files`,date,time,tag) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
 ```
 
 
-## Fielded questions
+## Fielded questions 
 
 We fielded three questions in the test sample:
 
@@ -128,13 +132,13 @@ We fielded three questions in the test sample:
 
 For each question, we collected responses on a Likert scale with text: "less than 1 month", "1-2 months", "2-3 months", "3-6 months", "more than 6 months", and a response equivalent to "does not apply" ("My province has not implemented such rules.").
 
-<img src="../assets/Screenshot_Survey1_consumer.png" width="200px" />
-<img src="../assets/Screenshot_Survey2_closures.png" width="200px" />
-<img src="../assets/Screenshot_Survey3_composite.png" width="200px" />
+<img src="questionnaires/Screenshot_Survey1_consumer.png" width="200px" />
+<img src="questionnaires/Screenshot_Survey2_closures.png" width="200px" />
+<img src="questionnaires/Screenshot_Survey3_composite.png" width="200px" />
 
-## First results
+## First results {.tabset .tabset-fade}
 
-Total observation by tag / question:
+### Total observation by tag / question
 
 ```{r summarize}
 results.final %>% group_by(tag,date) %>%
@@ -142,9 +146,8 @@ results.final %>% group_by(tag,date) %>%
   kable()
 ```
 
-Distribution of responses:
 
-```{r details, results="asis"}
+```{r details, include=FALSE}
 results.final %>% group_by(tag,Q1) %>%
   summarise(count=n()) %>% 
   group_by(tag) %>%
@@ -153,14 +156,33 @@ tags <- c("business","composite","people")
 print.part <- function(tagselect) {
   tmp %>% filter(tag==tagselect) %>% 
     mutate(percent = round(percent*100,2)) %>%
+    ungroup() %>%
+    select(-tag) %>%
   kable() %>%
   return()
 }
-lapply(as.list(tags), print.part)
-#htmltools::tagList(lapply(as.list(tags), print.part))
 ```
 
-## Do the different questions yield different responses?
+### Responses to Question 1
+
+```{r details1}
+print.part("people")
+```
+
+### Responses to Question 2
+
+```{r details2}
+print.part("business")
+```
+
+### Responses to Question 3
+
+```{r details3}
+print.part("composite")
+```
+
+## Do the different questions yield different responses? {.tabset .tabset-fade}
+
 
 ### Visually
 
@@ -261,23 +283,10 @@ Finally, a $\chi^2$ test of independence of distributions yields a test statisti
 
 
 
-## Decision
+## Decision Criterion
+
 We will use one composite question if the two variants (`business` and `people`) are not statistically different in our test sample, according to the majority of tests.
 
----
+## Results
 
-## Appendix
-
-### Data locations
-
-Permanent data is in
-
-> `r clean`
-
-and should be committed to the repository.
-
-Temporary data is in
-
-> `r interwrk`
-
-and can (should) be deleted after completion.
+Based on the observed data from the test data collected  between `r dates.final.begin` and `r dates.final.end` across Canada, we chose the two-question version.
