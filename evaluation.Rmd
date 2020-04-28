@@ -108,7 +108,15 @@ dates.final.end <- pull(dates.final,enddate)
 
 We [pre-registered](https://osf.io/729nr) the decision based on preliminary data collected after the first day of fielding the question (on `r test.question.date`). The decision about choice of the question, as well as preliminary descriptive results, are  based on data collected over the entire test time period, with a target n of `r planned.n` per question. We collected data from `r dates.final.begin` to `r dates.final.end` across Canada, achieving a total n=`r nrow(results.final)`.
 
-The data was manually downloaded from the Google Consumer Survey site on `r prelim.question.date`, and saved, using the  naming convention `tag-YYYYMMDD-HHMM.xlsx`. Data are available in our Github repository.
+The data was manually downloaded from the Google Consumer Survey site on `r prelim.question.date`, and saved, using the  naming convention `tag-YYYYMMDD-HHMM.xlsx`. Data used for both the original design and the full test time period are available in this archive:
+
+```{r list_prelim_files,include=TRUE}
+ws %>% mutate(path=str_remove(path,paste0(basepath,"/")),
+              fullpath = file.path(path,filename),
+              `Preliminary files`=paste0(quote('<a href="'),fullpath,quote('">'),fullpath,'</a>')) %>%
+  select(`Preliminary files`,date,time,tag) 
+```
+
 
 ## Fielded questions
 

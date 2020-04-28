@@ -1,5 +1,5 @@
 ---
-title: "Uncertainty in times of COVID-19: Choosing whether to ask 1 or 2 questions"
+title: "Uncertainty in times of COVID-19: Raw survey data"
 author: "Fabian Lange, Lars Vilhuber"
 date: "`r Sys.Date()`"
 output:
@@ -40,9 +40,159 @@ gcsprelim.final.results <- paste0(gcsresults,prelim.question.date)
 gcsprelim.final.list <- "gcs_prelim_final_list"
 
 ```
-## Purpose
 
-We fielded three questions regarding uncertainty in the April 2020 COVID-19 situation in Canada. Goal is to select either a two-question survey, using different questions for employment and consumer behavior, or a composite question that encompasses both. The question is whether answers between the two-question version differ between questions. The composite question was asked as a control. 
+
+# Expectations about Continuation of Social Distancing Rules in COVID-19 Times
+
+Data from a survey of consumer expectations
+
+## Description
+
+From April 24, 2020, Fabian Lange and Lars Vilhuber will conduct the survey "Uncertainty in COVID-19 times". The survey is a single-question survey focusing on people's anticipation about social distancing rules and firm closures during the 2020 COVID-19 health crisis. 
+
+We believe that this information is not otherwise available in a reliable and timely fashion. The information should be usable by policy-makers and researchers, to be included in models of future developments of society and the economy.
+
+### Citation
+
+Please cite the data as 
+
+> Lange, Fabian and Lars Vilhuber. 2020. "Expectations about Continuation of Social Distancing Rules in COVID-19 Times [dataset]." (this URL)
+
+We will be posting the data on Zenodo shortly. Data should be cite via DOI then.
+
+### Reference period
+
+The survey asks about point-in-time expectations. A new wave is launched every Friday. The list below provides the dates of collection for each wave.
+
+(LIST TO BE DERIVED FROM DATA)
+
+## Data description
+
+|  Topic | Answer |
+|--------|--------|
+| Geographic Coverage | United States of America, Canada |
+| Time  Periods | 2020-04-24 - TO BE FILLED |
+| Date of Collection | 2020-04-24 - TO BE FILLED |
+| Unit of Observation | Individual |
+| Description of Variables | Response to question, gender, age, geography, weight |
+
+### Data Dictionary
+
+#### Q1: Answer to primary question
+
+This field will differ across the two types of files.
+
+(TO BE FILLED OUT)
+
+#### Age
+
+(TO BD FILLED OUT)
+
+#### Gender
+
+(TO BE FILLED OUT)
+
+#### Geography
+
+Geography is as coded by Google Surveys. Precision may vary.
+
+(TO BE FILLED OUT)
+
+#### Weight
+
+(TO BE FILLED OUT)
+
+### Data structure
+
+Data files are available for each completed cycle of the survey, in general once a week, and are stored under [`final`](final/). Data from the preliminary study (assessing the questionnaire design) is stored under [`preliminary`](preliminary/). We may make available data before the survey is completed for each cycle, under [`temporary`](temporary/), however, once the final version from that cycle is available, these are deleted (this directory will be empty on Zenodo).
+
+
+### Data format
+
+Native format is Excel (XLSX). Filenames in [`final`](final/) are tagged with geography, language, the question type,and date downloaded:
+
+> `survey-[geography]-[language]-[question]-[date].xlsx`
+
+[`Temporary`](temporary/) files follow
+
+> `survey-[surveyid].xlsx`
+
+Files are provided as downloaded from Google Surveys. Each file has 4 tabs.
+
+#### Overview
+
+Lists the questions asked by the client, in this case Lange and Vilhuber, as well as a survey ID.
+
+#### Topline
+
+This tab contains a weighted summary of the responses to the questions (similar to the above summary). 
+
+#### Complete responses
+
+This tab contains the actual microdata for any complete responses. Note that for a single-question survey, this is identical to the "All responses". A complete response might have a weight of zero.
+
+#### All responses
+
+All responses, whether complete or not, are recorded on this tab. In the case of a single-question survey, this is identical to the "Complete responses" tab.
+
+## Data sources and methodology
+
+### Target population
+
+- All Canadians aged 18 and older from the ten provinces and three territories are eligible to participate.
+- All US residents aged 18 and older are eligible to participate.
+
+### Instrument design
+
+Each individual is asked one of two questions: how long they expect "social distancing rules" or "business closures" to remain in effect:
+
+- How much longer do you expect social distancing rules (restrictions on gatherings, stay-at-home rules) to stay in place in your province/state?
+- How much longer do you expect the closure of non-essential businesses to stay in place in your province/state?
+
+Five response choices are offered: 
+
+- "less than 1 month", 
+- "1-2 months", 
+- "2-3 months", 
+- "3-6 months", 
+- "more than 6 months". 
+
+An additional answer allows respondents to affirm that "such measures are not implemented in their province/state". See [questionnaires.md] for visual representation of the questions. 
+
+
+<img src="questionnaires/Screenshot_Survey1_consumer.png" width="200px" />
+<img src="questionnaires/Screenshot_Survey2_closures.png" width="200px" />
+
+### Data collection
+
+Data is collected via Google Surveys. For English-language surveys, data is collected via a web form. For French-language surveys, the Android Google Survey app is used, as web-collection in French is not possible via Google Surveys. See Google (2018) for more details.
+
+### Sampling
+
+Google Surveys is an online non-probability survey. It uses  stratified sampling for collection, based (in the US) on the target internet population from the  2017 Current Population Survey (CPS) Computer and Internet Use Supplement [@sostek_how_2018;@google_methodology_2020]. 
+
+Data are collected directly from survey respondents.
+
+For each country, we plan to collect 2500 responses per question, per week. For Canada, a French-language variant is fielded. For 2016, 20.4% of Canadians spoke French and no English as the language spoken most often at home. We thus target 510 responses via the French-language questionnaire, and 1990 in English.
+
+### Imputation
+
+All demographics are imputed by Google Surveys, if collected via web. Demographics for respondents via the app are collected through the app. 
+
+### Quality evaluation
+
+A preliminary survey was conducted to allow for choice of either a two-question variant, or a one-question variant that incluced both social distancing and business closures ("How much longer do you expect social distancing rules (restrictions on gatherings, closure of non-essential businesses, stay-at-home rules) to stay in place in your province?"). See [evaluation.md] for more information. 
+
+
+
+### Privacy and disclosure control
+
+Privacy and disclosure control are described in Google (2018). For most respondents, no direct or indirect identifiers are collected, and are imputed based on other information available to Google, but not the sponsors of the survey. 
+
+### Response rates
+
+The specific response rates are not known. Google (2018) reports response rates in general for this type of data collection.
+
 
 
 
@@ -151,124 +301,4 @@ lapply(as.list(tags), print.part)
 #htmltools::tagList(lapply(as.list(tags), print.part))
 ```
 
-## Do the different questions yield different responses?
 
-### Visually
-
-```{r graph, echo=FALSE}
-results.final %>% 
-  ggplot(aes(Q1,color=tag,fill=tag)) +
-  geom_histogram(stat="count",position="dodge",aes(label=..count..)) +
-  theme_minimal() +
-  scale_color_brewer(palette="Dark2") +
-  scale_fill_brewer(palette="Dark2") +
-  ylab(element_blank())+
-  xlab(element_blank())+
-  coord_flip()
-```
-
-### Kolmogorov-Smirnov Test
-
-```{r kstest,echo=FALSE}
-# Do a K-S test
-# https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test
-results.final %>% group_by(tag,Q1) %>%
-  summarize(count=n()) -> results.q1.distribution
-hist.business <- results.q1.distribution %>% filter(tag=="business") %>% pull(count) 
-hist.people <- results.q1.distribution %>% filter(tag=="people") %>% pull(count)
-hist.composite <- results.q1.distribution %>% filter(tag=="composite") %>% pull(count)
-
-sqrt = sqrt((sum(hist.business) + sum(hist.people))/(sum(hist.business)*sum(hist.people)))
-sqrt.final = sqrt( (planned.n + planned.n)/(planned.n*planned.n))
-
-calpha = 1.358
-pwr.alpha = 0.05
-
-
-ks.result <- dgof::ks.test(hist.business , hist.people,simulate.p.value = TRUE,B=1000)
-ks.result
-
-```
-
-In the Kolmogorov-Smirnov test, the entire (cumulative) distribution is tested for equality. The hypothesis of equality of distributions 
-is rejected when the test statistic $D$  is larger than $c(\alpha) \sqrt{\frac{n+m}{n*m}}$ where $n$ and $m$ are the sample sizes. 
-
-For the full test data, $n=$ `r sum(hist.business)` and $m=$ `r sum(hist.people)`, the square root evaluates to `r sqrt`. The test statistic $D=$ `r ks.result$statistic`, with a p-value of `r ks.result$p.value`. Based on the KS test, `r if ( ks.result$statistic > sqrt * calpha ) { "we thus "} else { "we cannot " }` reject the hypothesis of equality of distributions.
-
-
-
-### Single-dimensional test
-
-```{r fraction12, include=FALSE}
-n.business <- sum(hist.business)
-n.people <- sum(hist.people)
-q1.r2.business <- results.q1.distribution %>% filter(tag=="business",Q1=="1-2 months") %>% pull(count)
-q1.r2.people <- results.q1.distribution %>% filter(tag=="people",Q1=="1-2 months") %>% pull(count)
-q1.r2.pct.business <- q1.r2.business/n.business
-q1.r2.pct.people <- q1.r2.people/n.people
-
-q1.r5.business <- results.q1.distribution %>% filter(tag=="business",Q1=="more than 6 months") %>% pull(count)
-q1.r5.people <- results.q1.distribution %>% filter(tag=="people",Q1=="more than 6 months") %>% pull(count)
-q1.r5.pct.business <- q1.r5.business/n.business
-q1.r5.pct.people <- q1.r5.people/n.people
-
-# overall proportion 
-p.r2 = ( q1.r2.pct.business * n.business + q1.r2.pct.people * n.people )/ ( n.business + n.people ) 
-q.r2 = 1 - p.r2
-
-q1.r2.zscore <- ( q1.r2.pct.people  - q1.r2.pct.business  )/ sqrt( p.r2*q.r2/ n.business + p.r2*q.r2/n.people )
-
-# or all in one
-
-q1.r2.ztest <- prop.test(c(q1.r2.business,q1.r2.people),c(n.business,n.people))
-q1.r5.ztest <- prop.test(c(q1.r5.business,q1.r5.people),c(n.business,n.people))
-q1.r2.ztest
-```
-
-Alternatively, we can compute a $z$-test for the  proportion responding to Q1 with "1-2 months", with the remaining fractions collapsed to an "other" category. For the test sample, these numbers are `r q1.r2.pct.business * 100` percent for the `business`  version, and `r q1.r2.pct.people * 100` percent for the `people` version. The $\chi^2$ statistic has a value of `r q1.r2.ztest$statistic` and a p-value of `r q1.r2.ztest$p.value`. Based on the $z$-test, we `r if ( q1.r2.ztest$p.value < pwr.alpha ) { "thus "} else { "cannot " }` reject the hypothesis of equality of responses to Q1. For the (non-pre-registered) comparison of the fraction responding with "more than 6 months", the $\chi^2$ statistic has a value of `r q1.r5.ztest$statistic` and a p-value of `r q1.r5.ztest$p.value`.
-```{r powercalc, include=TRUE}
-d=round(q1.r2.pct.business,0)
-power <- pwr.2p.test(n=n.business,h=d,sig.level=pwr.alpha)
-```
-The test has power of `r power$power` for the sample size n=`r n.business` and effect size `r round(q1.r5.pct.business * 100,2)` at $\alpha =$ `r pwr.alpha`.
-
-### Fisher's exact test
-
-```{r fisher_test}
-fisher.result <- fisher.test(hist.business,hist.people,simulate.p.value = TRUE, B = 10000)
-fisher.result
-```
-We can also use Fisher's exact test to assess whether the two distributions are different. The null hypothesis is that the rows *and* columns of the two histograms are independent (i.e., the two distributions are different).
-Fisher's test when applied to the test sample gives a p-value of `r fisher.result$p.value`, so the null that the two distributions are different  `r if ( fisher.result$p.value > pwr.alpha ) { "should be "} else { "cannot be" }` rejected.
-
-### $\chi^2$ test
-
-```{r xi_squared}
-x2.result <- chisq.test(hist.business,hist.people,simulate.p.value = TRUE, B = 10000)
-x2.result
-```
-
-Finally, a $\chi^2$ test of independence of distributions yields a test statistic of `r x2.result$statistic` and a p-value of `r x2.result$p.value`, `r if ( x2.result$p.value < pwr.alpha ) { "rejecting "} else { "not rejecting" }` the null that the two histograms are different.
-
-
-
-## Decision
-We will use one composite question if the two variants (`business` and `people`) are not statistically different in our test sample, according to the majority of tests.
-
----
-
-## Appendix
-
-### Data locations
-
-Permanent data is in
-
-> `r clean`
-
-and should be committed to the repository.
-
-Temporary data is in
-
-> `r interwrk`
-
-and can (should) be deleted after completion.
