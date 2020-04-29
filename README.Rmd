@@ -2,8 +2,15 @@
 title: "Uncertainty in times of COVID-19: Raw survey data"
 author: "Fabian Lange, Lars Vilhuber"
 date: "`r Sys.Date()`"
+always_allow_html: true
 output:
+  pdf_document:
+    includes:
+      in_header: _includes/header.tex
+    toc: yes
   html_document: 
+    includes:
+      before_body: _includes/header.html
     keep_md: yes
     self_contained: no
     toc: yes
@@ -11,8 +18,6 @@ output:
     toc_float: yes
     df_print: paged
     lib_dir: libs
-  pdf_document:
-    toc: yes
 editor_options:
   chunk_output_type: console
 bibliography: from_zotero.bib
