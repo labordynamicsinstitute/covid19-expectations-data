@@ -290,3 +290,9 @@ We will use one composite question if the two variants (`business` and `people`)
 ## Results
 
 Based on the observed data from the test data collected  between `r dates.final.begin` and `r dates.final.end` across Canada, we chose the two-question version.
+
+## License
+
+This text and the underlying data are licensed under a [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) license.
+
+

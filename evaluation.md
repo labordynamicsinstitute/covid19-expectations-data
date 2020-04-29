@@ -1,7 +1,7 @@
 ---
 title: "Uncertainty in times of COVID-19: Choosing whether to ask 1 or 2 questions"
 author: "Fabian Lange, Lars Vilhuber"
-date: "2020-04-28"
+date: "2020-04-29"
 always_allow_html: true
 output:
   html_document: 
@@ -180,3 +180,12 @@ We will use one composite question if the two variants (`business` and `people`)
 ## Results
 
 Based on the observed data from the test data collected  between 2020-04-12 and 2020-04-17 across Canada, we chose the two-question version.
+
+## License
+
+This text and the underlying data are licensed under a [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) license.
+
+html
+
+
+

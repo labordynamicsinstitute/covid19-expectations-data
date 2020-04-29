@@ -335,5 +335,11 @@ Privacy and disclosure control are described in @google_methodology_2020. For mo
 The specific response rates are not known. @google_methodology_2020 reports response rates in general for this type of data collection.
 
 
+## License
+
+These data are licensed under a [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) license.
+
+
+
 ## References
 
