@@ -7,6 +7,7 @@ output:
     keep_md: yes
     self_contained: no
     toc: yes
+    toc_depth: 4
     toc_float: yes
     df_print: paged
     lib_dir: libs
@@ -14,6 +15,7 @@ output:
     toc: yes
 editor_options:
   chunk_output_type: console
+bibliography: from_zotero.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -30,7 +32,7 @@ test.question.date <- "20200412"
 prelim.question.date <- "20200421" # date we downloaded the final results from the test.
 
 planned.n = 250 
-
+target = 2500 # per question
 
 # file names (no path)
 gcsresults <- "gcs_results"
@@ -39,10 +41,110 @@ gcsprelim.list <- "gcs_prelim_list"
 gcsprelim.final.results <- paste0(gcsresults,prelim.question.date)
 gcsprelim.final.list <- "gcs_prelim_final_list"
 
+# Download Zotero bibliography
+zotero.grp <- 2484699
+zotero.api <- "https://api.zotero.org/groups/"
+zotero.url.base <- "https://www.zotero.org/groups/"
+zotero.url.suffix <- "covid-19-econ"
+
+zotero.url <- paste0(zotero.url.base,zotero.grp,"/",zotero.url.suffix,"/library")
+download.file(paste0(zotero.api,zotero.grp,"/items?format=bibtex"),
+              file.path("from_zotero.bib"))
+
+# read in the standardizer mapping
+standardizer_file <- file.path(basepath,"auxiliary","standardize_values.xlsx")
+standardize_Q1 <- read_excel(standardizer_file,
+                                 sheet = "Q1")
+
+```
+
+```{r read_list,include=FALSE,cache=FALSE}
+# Compile all the worksheets 
+gcsdir_prelim <- prelim
+ws.prelim <- 
+  enframe(list.files(gcsdir_prelim,"*.xlsx")) %>% 
+  mutate(filename=value,path=gcsdir_prelim) %>%
+  separate(value,c("drop","tag","date","time"),sep="-") %>%
+  separate(time,c("time"),extra = "drop") %>% 
+  select(-drop,-name) %>%
+  mutate(type="preliminary") %>%
+  mutate(showpath=str_remove(path,paste0(basepath,"/")))
+
+# different tag sets for final data: survey-canada-fr-businesses-20200426.xlsx
+ws <- 
+  enframe(list.files(gcsdir,"*.xlsx")) %>% 
+  mutate(filename=value,path=gcsdir) %>%
+  separate(value,c("drop","geography","language","tag","dateext"),sep="-") %>%
+  separate(dateext,c("date","extension"))  %>%
+  mutate(type="regular") %>%
+  select(-drop,-name) %>%
+  mutate(showpath=str_remove(path,paste0(basepath,"/")))
 ```
 
 
-# Expectations about Continuation of Social Distancing Rules in COVID-19 Times
+```{r read_data,include=FALSE,cache=FALSE}
+for ( x in 1:nrow(ws) ) {
+  filename=as.character(ws[x,"filename"])
+  path=as.character(ws[x,"path"])
+  if ( file.exists(file.path(path,filename )) ) {
+    print(paste("Processing: ", filename))
+    if ( x == 1 ) {
+      # Read in the first list and set variable types
+      results <- read_excel(file.path(path,filename),
+                            sheet = "Complete responses")
+      results$tag <- as.character(ws[x,"tag"])
+      results$date <- as.character(ws[x,"date"])
+      results$source <- as.character(ws[x,"filename"])
+    } else {
+      # Read in the subsequent lists and set variable types
+      tmp <- read_excel(file.path(path,filename),
+                            sheet = "Complete responses")
+      tmp$tag <- as.character(ws[x,"tag"])
+      tmp$date <- as.character(ws[x,"date"])
+      tmp$source <- as.character(ws[x,"filename"])
+      # Add to master dataframe
+      results <- bind_rows(results,tmp)
+      rm(tmp)
+    }
+  }
+}
+
+# convert to factors
+```
+
+
+```{r clean_data,include=FALSE,cache=FALSE}
+# clean up a bit
+
+# get metadata 
+results %>% 
+  group_by(source) %>%
+  summarize(begintime=min(`Time (UTC)`),endtime=max(`Time (UTC)`)) %>%
+  mutate(begindate=as.Date(begintime),enddate=as.Date(endtime)) -> dates.by.file
+dates.by.file %>% 
+  ungroup() %>%
+  summarize(begindate=min(begindate),enddate=max(enddate)) -> dates.final
+dates.final.begin <- pull(dates.final,begindate)
+dates.final.end <- pull(dates.final,enddate)
+
+# merge dates.by.file back onto ws
+ws.with.dates <- left_join(ws,dates.by.file,by=c("filename" = "source"))
+results.final <- left_join(results,
+                      ws.with.dates %>% select(filename,geography,language,begintime,endtime,begindate,enddate),
+                      by=c("source" = "filename")) %>% 
+  rename(rt_Q1_ms = `Response Time #1 (ms)`)   %>%
+  # recode French to English, Canada to US to generic
+  left_join(standardize_Q1) %>%
+  mutate(Q1 = factor(Q1_std,levels=c("less than 1 month",
+                                     "1-2 months",
+                                     "2-3 months",
+                                     "3-6 months",
+                                     "more than 6 months",
+                                     "My state/province has not implemented such rules."))) %>%
+  select(-Q1_std)
+# this should check for NA.
+```
+
 
 Data from a survey of consumer expectations
 
@@ -60,47 +162,221 @@ Please cite the data as
 
 We will be posting the data on Zenodo shortly. Data should be cite via DOI then.
 
-### Reference period
+## List of files {.tabset .tabset-fade}
 
-The survey asks about point-in-time expectations. A new wave is launched every Friday. The list below provides the dates of collection for each wave.
 
-(LIST TO BE DERIVED FROM DATA)
+### Final files
+
+Final files are uploaded after each wave is completed. Filenames in [`final`](final/) tagged with geography, language, the question type,and date downloaded:
+
+> `survey-[geography]-[language]-[question]-[date].xlsx`
+
+```{r listfiles,results='asis'}
+ws %>% select(showpath,filename) %>% 
+  mutate(Files=paste0("[",filename,"](",file.path(showpath,filename),")"))  %>%
+  select(Files) %>% kable()
+```
+
+### Temporary files
+
+[`Temporary`](temporary/) files follow
+
+> `survey-[surveyid].xlsx`
+
+
 
 ## Data description
 
 |  Topic | Answer |
 |--------|--------|
 | Geographic Coverage | United States of America, Canada |
-| Time  Periods | 2020-04-24 - TO BE FILLED |
-| Date of Collection | 2020-04-24 - TO BE FILLED |
+| Time  Periods | `r dates.final.begin` - `r dates.final.end`. |
+| Date of Collection | `r dates.final.begin` - `r dates.final.end`. |
 | Unit of Observation | Individual |
-| Description of Variables | Response to question, gender, age, geography, weight |
+| Description of Variables | `r names(results)[1:10] ` |
+
+
+### Reference period
+
+The survey asks about point-in-time expectations. A new wave is launched every Friday. The list below provides the dates of collection for each wave. Currently, data are available covering the period between `r dates.final.begin` and `r dates.final.end`.
+
+```{r}
+library(DT)
+ws.with.dates %>% 
+  mutate(`Files` = file.path(showpath,filename)) %>%
+  select(Files, begintime, endtime) %>% 
+  arrange(begintime) %>%
+  datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
+
+```
 
 ### Data Dictionary
 
-#### Q1: Answer to primary question
+#### Q1: Answer to primary question {.tabset .tabset-fade}
 
-This field will differ across the two types of files.
+This field will differ across the two types of files, geography, and languages. A consolidated (standardized) distribution is shown below, using the [standardizer mapping](`r str_remove(standardizer_file,paste0(basepath,"/"))`).
+
+##### Standardized distribution
+
+```{r graph, echo=FALSE}
+results.final %>% 
+  ggplot(aes(Q1,color=tag,fill=tag)) +
+  geom_histogram(stat="count",position="dodge",aes(label=..count..)) +
+  theme_minimal() +
+  scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2") +
+  ylab(element_blank())+
+  xlab(element_blank())+
+  coord_flip()
+```
+
+
+```{r q1details, include=FALSE}
+tmp <- left_join(results,
+                      ws.with.dates %>% select(filename,geography,language),
+                      by=c("source" = "filename")) %>%
+  # insert Québec into Canada
+  mutate(geography = recode(geography,"qc" = "canada")) %>%
+  group_by(tag,geography,language,`Question #1 Answer`) %>%
+  summarise(count=n()) %>% 
+  group_by(tag,geography,language) %>%
+  mutate(percent = count / sum(count)) 
+
+tags <- c("business","people")
+
+print.part <- function(tagselect,geo,lang) {
+  tmp %>% filter(tag==tagselect & geography == geo & language == lang) %>% 
+    mutate(percent = round(percent*100,2)) %>%
+    ungroup() %>%
+    select(-tag,-geography,-language) %>%
+  kable() %>%
+  return()
+}
+
+tabulate.var <- function(var,df=results.final) {
+  quo_var = enquo(var)
+  
+  df %>% 
+  group_by(!! quo_var) %>% 
+  summarise(count=n()) %>% 
+  ungroup() %>%
+  mutate(percent = count / sum(count)) %>%
+  mutate(percent = round(percent*100,2)) %>% return()
+}
+```
+
+##### Business, Canada, French
+
+```{r details_b_c_f}
+print.part("businesses","canada","fr")
+```
+
+##### People, Canada, French
+
+```{r details_p_c_f}
+print.part("people","canada","fr")
+```
+
+##### Business, US, English
+
+```{r details_b_u_e}
+print.part("businesses","us","en")
+```
+
+##### People, US, English
+
+```{r details_p_u_e}
+print.part("people","us","en")
+```
+
 
 (TO BE FILLED OUT)
 
 #### Age
 
-(TO BD FILLED OUT)
+```{r details_age}
+tabulate.var(Age) %>% kable()
+```
 
 #### Gender
 
-(TO BE FILLED OUT)
+```{r details_gender}
+tabulate.var(Gender) %>% kable()
+```
 
-#### Geography
+#### Geography {.tabset .tabset-fade}
 
-Geography is as coded by Google Surveys. Precision may vary.
+Geography is as coded by Google Surveys. Precision may vary, having country, region, province, and sometimes city.
 
-(TO BE FILLED OUT)
+Distribution across countries
+
+```{r details_country}
+results.final %>% select(Geography) %>%
+  separate(Geography,c("Country","Region","State/Province","City"),sep="-") %>%
+  replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State/Province` = "ZZ Unknown")) -> geo
+tabulate.var(Country,df=geo) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
+```
+
+##### Regions
+
+Regions may be single states or provinces, or larger collections.
+
+```{r details_regions}
+tabulate.var(Region,df=geo) %>% datatable(autoHideNavigation = TRUE)
+```
+
+##### States/Provinces
+
+```{r details_state_province}
+tabulate.var(`State/Province`,df=geo) %>% datatable(autoHideNavigation = TRUE)
+```
+
+##### Cities
+
+In some cases, details is available at the city level.
+
+```{r details_cities}
+tabulate.var(City,df=geo) %>% datatable(autoHideNavigation = TRUE)
+```
+
+
+##### Detailed geography
+
+```{r details_geography}
+tabulate.var(Geography) %>% datatable() 
+```
 
 #### Weight
 
-(TO BE FILLED OUT)
+See elsewhere in this document how weights are computed.
+
+```{r details_weights,warning=FALSE,echo=FALSE,error=FALSE,message=FALSE}
+library(summarytools)
+results.final %>% select(Weight) %>% descr(stats="common") %>% 
+  datatable(autoHideNavigation = TRUE,options = list(dom = 't')) %>%
+  formatRound(columns=c("Weight"),digits=4)
+```
+
+#### Response Time
+
+```{r details_responsetime}
+results.final %>% select(rt_Q1_ms) %>% descr(stats="common") %>% 
+  datatable(autoHideNavigation = TRUE,options = list(dom = 't')) %>%
+  formatRound(columns=c("rt_Q1_ms"),digits=4)
+detach("package:summarytools",unload=TRUE)
+```
+
+#### Publisher Category
+
+```{r details_publisher}
+tabulate.var(`Publisher Category`) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't')) 
+```
+
+#### Not tabulated
+
+- `User ID`
+- `Time (UTC)`
+- `Survey Completion`
 
 ### Data structure
 
@@ -109,13 +385,7 @@ Data files are available for each completed cycle of the survey, in general once
 
 ### Data format
 
-Native format is Excel (XLSX). Filenames in [`final`](final/) are tagged with geography, language, the question type,and date downloaded:
-
-> `survey-[geography]-[language]-[question]-[date].xlsx`
-
-[`Temporary`](temporary/) files follow
-
-> `survey-[surveyid].xlsx`
+Native format is Excel (XLSX). 
 
 Files are provided as downloaded from Google Surveys. Each file has 4 tabs.
 
@@ -135,14 +405,16 @@ This tab contains the actual microdata for any complete responses. Note that for
 
 All responses, whether complete or not, are recorded on this tab. In the case of a single-question survey, this is identical to the "Complete responses" tab.
 
-## Data sources and methodology
+## Data sources and methodology  
+
 
 ### Target population
 
 - All Canadians aged 18 and older from the ten provinces and three territories are eligible to participate.
 - All US residents aged 18 and older are eligible to participate.
 
-### Instrument design
+### Instrument design  
+
 
 Each individual is asked one of two questions: how long they expect "social distancing rules" or "business closures" to remain in effect:
 
@@ -157,7 +429,10 @@ Five response choices are offered:
 - "3-6 months", 
 - "more than 6 months". 
 
-An additional answer allows respondents to affirm that "such measures are not implemented in their province/state". See [questionnaires.md] for visual representation of the questions. 
+An additional answer allows respondents to affirm that "such measures are not implemented in their province/state". See [questionnaires](#questionnaires) for visual representation of the questions. 
+
+
+### Questionnaires
 
 
 <img src="questionnaires/Screenshot_Survey1_consumer.png" width="200px" />
@@ -165,7 +440,7 @@ An additional answer allows respondents to affirm that "such measures are not im
 
 ### Data collection
 
-Data is collected via Google Surveys. For English-language surveys, data is collected via a web form. For French-language surveys, the Android Google Survey app is used, as web-collection in French is not possible via Google Surveys. See Google (2018) for more details.
+Data is collected via Google Surveys. For English-language surveys, data is collected via a web form. For French-language surveys, the Android Google Survey app is used, as web-collection in French is not possible via Google Surveys. See @sostek_how_2018 and @google_methodology_2020 for more details.
 
 ### Sampling
 
@@ -173,7 +448,23 @@ Google Surveys is an online non-probability survey. It uses  stratified sampling
 
 Data are collected directly from survey respondents.
 
-For each country, we plan to collect 2500 responses per question, per week. For Canada, a French-language variant is fielded. For 2016, 20.4% of Canadians spoke French and no English as the language spoken most often at home. We thus target 510 responses via the French-language questionnaire, and 1990 in English.
+For each country, we plan to collect 2500 responses per question, per week. For Canada, a French-language variant is fielded. In order to determine the split, we use Statistics Canada statistics on "Languag
+e spoken most often at home" by other language(s) spoken regularly at home and age" [@statistics_canada_language_2017],^[Table can be downloaded from [here](`r statcan_languages$url`).] combining responses for "French" and "French and non-official language" (i.e., no English mentioned).
+```{r sample_sizes_canada, include=FALSE}
+# computing language fraction in Canada
+languages <- readr::read_csv(url(statcan_languages$url))
+languages %>% filter(`Geographic code`=="01") -> languages.cdn
+total = languages.cdn %>% select(value = `Language spoken most often at home: Total`) %>% pull(value)
+french = languages.cdn %>% select(value = `Language spoken most often at home: French`) %>% pull(value)
+frenchalt = languages.cdn %>% 
+  select(value = `Language spoken most often at home: French and non-official language`) %>% 
+  pull(value)
+frenchpct <- round(( french + frenchalt ) / total,3)
+target_french <- round(target * frenchpct,0)
+```
+For 2016, `r frenchpct*100`% spoke French and no English as the language spoken most often at home. We thus target `r target_french` responses via the French-language questionnaire, and `r target - target_french` in English.
+
+
 
 ### Imputation
 
@@ -181,124 +472,18 @@ All demographics are imputed by Google Surveys, if collected via web. Demographi
 
 ### Quality evaluation
 
-A preliminary survey was conducted to allow for choice of either a two-question variant, or a one-question variant that incluced both social distancing and business closures ("How much longer do you expect social distancing rules (restrictions on gatherings, closure of non-essential businesses, stay-at-home rules) to stay in place in your province?"). See [evaluation.md] for more information. 
+A preliminary survey was conducted to allow for choice of either a two-question variant, or a one-question variant that incluced both social distancing and business closures ("How much longer do you expect social distancing rules (restrictions on gatherings, closure of non-essential businesses, stay-at-home rules) to stay in place in your province?"). See "[Uncertainty in times of COVID-19: Choosing whether to ask 1 or 2 questions](evaluation.md)" for more information. 
 
 
 
 ### Privacy and disclosure control
 
-Privacy and disclosure control are described in Google (2018). For most respondents, no direct or indirect identifiers are collected, and are imputed based on other information available to Google, but not the sponsors of the survey. 
+Privacy and disclosure control are described in @google_methodology_2020. For most respondents, no direct or indirect identifiers are collected, and are imputed based on other information available to Google, but not the sponsors of the survey. 
 
 ### Response rates
 
-The specific response rates are not known. Google (2018) reports response rates in general for this type of data collection.
+The specific response rates are not known. @google_methodology_2020 reports response rates in general for this type of data collection.
 
 
-
-
-```{r read_list,include=FALSE,cache=FALSE}
-# Compile all the worksheets 
-gcsdir_prelim <- file.path(gcsdir,"preliminary")
-ws <- 
-  enframe(list.files(gcsdir_prelim,"*.xlsx")) %>% 
-  mutate(filename=value,path=gcsdir_prelim) %>%
-  separate(value,c("drop","tag","date","time"),sep="-") %>%
-  separate(time,c("time"),extra = "drop") %>% 
-  filter(date==prelim.question.date) %>%
-  select(-drop,-name)
-
-for ( x in 1:nrow(ws) ) {
-  filename=as.character(ws[x,"filename"])
-  path=as.character(ws[x,"path"])
-  if ( file.exists(file.path(path,filename )) ) {
-    print(paste("Processing: ", filename))
-    if ( x == 1 ) {
-      # Read in the first list and set variable types
-      results <- read_excel(file.path(path,filename),
-                            sheet = "Complete responses")
-      results$tag <- as.character(ws[x,"tag"])
-      results$date <- as.character(ws[x,"date"])
-    } else {
-      # Read in the subsequent lists and set variable types
-      tmp <- read_excel(file.path(path,filename),
-                            sheet = "Complete responses")
-      tmp$tag <- as.character(ws[x,"tag"])
-      tmp$date <- as.character(ws[x,"date"])
-      # Add to master dataframe
-      results <- bind_rows(results,tmp)
-      rm(tmp)
-    }
-  }
-}
-# clean up a bit
-results %>% 
-  rename(Q1 = `Question #1 Answer`) %>%
-  rename(rt_Q1_ms = `Response Time #1 (ms)` ) %>%
-  mutate(Q1 = factor(Q1,levels=c("less than 1 month","1-2 months","2-3 months","3-6 months","more than 6 months","My province has not implemented such rules."))) -> results.final
-#mysave(results.final,gcsresults)
-
-if (file.exists(file.path(outputs,paste0(gcsprelim.final.results,".Rds")))) {
-  print("Not overwriting existing file.")
-} else {
-  results.final %>% filter(tag==prelim.question.date) -> results.prelim
-  mysave(results.prelim,gcsprelim.final.results)
-  mysave(ws,gcsprelim.final.list)
-}
-# end of else
-
-# get metadata 
-results.final %>% summarize(begintime=min(`Time (UTC)`),endtime=max(`Time (UTC)`)) %>%
-  mutate(begindate=as.Date(begintime),enddate=as.Date(endtime)) -> dates.final
-dates.final.begin <- pull(dates.final,begindate)
-dates.final.end <- pull(dates.final,enddate)
-```
-
-## Sources
-
-We pre-registered the decision based on preliminary data collected after the first day of fielding the question (on `r test.question.date`). The decision about choice of the question, as well as preliminary descriptive results, are  based on data collected over the entire test time period, with a target n of `r planned.n` per question. We collected data from `r dates.final.begin` to `r dates.final.end` across Canada, achieving a total n=`r nrow(results.final)`.
-
-The data was manually downloaded from the Google Consumer Survey site on `r prelim.question.date`, and saved, using the  naming convention `tag-YYYYMMDD-HHMM.xlsx`. Data are available in our Github repository.
-
-## Fielded questions
-
-We fielded three questions in the test sample:
-
-- How much longer do you expect social distancing rules (restrictions on gatherings, stay-at-home rules) to stay in place in your province?
-- How much longer do you expect the closure of non-essential businesses to stay in place in your province?
-- How much longer do you expect social distancing rules (restrictions on gatherings, closure of non-essential businesses, stay-at-home rules) to stay in place in your province?
-
-For each question, we collected responses on a Likert scale with text: "less than 1 month", "1-2 months", "2-3 months", "3-6 months", "more than 6 months", and a response equivalent to "does not apply" ("My province has not implemented such rules.").
-
-<img src="../assets/Screenshot_Survey1_consumer.png" width="200px" />
-<img src="../assets/Screenshot_Survey2_closures.png" width="200px" />
-<img src="../assets/Screenshot_Survey3_composite.png" width="200px" />
-
-## First results
-
-Total observation by tag / question:
-
-```{r summarize}
-results.final %>% group_by(tag,date) %>%
-  summarise(count=n()) %>%
-  kable()
-```
-
-Distribution of responses:
-
-```{r details, results="asis"}
-results.final %>% group_by(tag,Q1) %>%
-  summarise(count=n()) %>% 
-  group_by(tag) %>%
-  mutate(percent = count / sum(count)) -> tmp
-tags <- c("business","composite","people")
-print.part <- function(tagselect) {
-  tmp %>% filter(tag==tagselect) %>% 
-    mutate(percent = round(percent*100,2)) %>%
-  kable() %>%
-  return()
-}
-lapply(as.list(tags), print.part)
-#htmltools::tagList(lapply(as.list(tags), print.part))
-```
-
+## References
 

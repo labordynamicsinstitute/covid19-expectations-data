@@ -7,17 +7,24 @@ options(repos=paste0("https://cran.microsoft.com/snapshot/",mran.date,"/"))
 
 
 
-pkgTest <- function(x)
+pkgTest <- function(x,try=FALSE)
 {
 	if (!require(x,character.only = TRUE))
 	{
 		install.packages(x,dep=TRUE)
 		if(!require(x,character.only = TRUE)) stop("Package not found")
 	}
-	return("OK")
+  if ( try ) {
+    print(paste0("Unloading ",x))
+    detach(paste0("package:",x), unload = TRUE, character.only = TRUE)
+  }
+  return("OK")
 }
 
-global.libraries <- c("tidyverse","devtools","rprojroot","tictoc","ggplot2","readxl",
-                      "readstata13","knitr","ggthemes","dgof","pwr","jsonlite","DT")
+global.libraries <- c("tidyverse","devtools","rprojroot","ggplot2","readxl",
+                      "knitr","ggthemes","jsonlite","DT")
+
+optional.libraries <- c("summarytools")
 
 results <- sapply(as.list(global.libraries), pkgTest)
+results <- sapply(as.list(optional.libraries), pkgTest,try=TRUE)
