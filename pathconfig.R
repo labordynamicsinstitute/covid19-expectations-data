@@ -24,3 +24,7 @@ for ( dir in list(temporary,interwrk)){
 	dir.create(file.path(dir))
 	}
 }
+
+# for web pages
+baseurl <- "https://labordynamicsinstitute.github.io/"
+gitname <- "covid19-expectations-data"

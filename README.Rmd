@@ -4,10 +4,6 @@ author: "Fabian Lange, Lars Vilhuber"
 date: "`r Sys.Date()`"
 always_allow_html: true
 output:
-  pdf_document:
-    includes:
-      in_header: _includes/header.tex
-    toc: yes
   html_document: 
     includes:
       before_body: _includes/header.html
@@ -18,6 +14,10 @@ output:
     toc_float: yes
     df_print: paged
     lib_dir: libs
+  pdf_document:
+    includes:
+      in_header: _includes/header.tex
+    toc: yes
 editor_options:
   chunk_output_type: console
 bibliography: from_zotero.bib
@@ -32,6 +32,7 @@ knitr::opts_chunk$set(cache = TRUE)
 source(file.path(rprojroot::find_root(rprojroot::has_file("pathconfig.R")),"pathconfig.R"),echo=TRUE)
 source(file.path(programs,"global-libraries.R"),echo=TRUE)
 source(file.path(programs,"config.R"),echo=TRUE)
+source(file.path(programs,"common-functions.R"),echo=TRUE)
 
 test.question.date <- "20200412"
 prelim.question.date <- "20200421" # date we downloaded the final results from the test.
@@ -61,6 +62,9 @@ standardizer_file <- file.path(basepath,"auxiliary","standardize_values.xlsx")
 standardize_Q1 <- read_excel(standardizer_file,
                                  sheet = "Q1")
 
+publicurl     <- file.path(baseurl,gitname)
+publicurl.pdf <- file.path(publicurl,"README.pdf")
+
 ```
 
 ```{r read_list,include=FALSE,cache=FALSE}
@@ -76,59 +80,30 @@ ws.prelim <-
   mutate(showpath=str_remove(path,paste0(basepath,"/")))
 
 # different tag sets for final data: survey-canada-fr-businesses-20200426.xlsx
-ws <- 
-  enframe(list.files(gcsdir,"*.xlsx")) %>% 
-  mutate(filename=value,path=gcsdir) %>%
-  separate(value,c("drop","geography","language","tag","dateext"),sep="-") %>%
-  separate(dateext,c("date","extension"))  %>%
-  mutate(type="regular") %>%
-  select(-drop,-name) %>%
-  mutate(showpath=str_remove(path,paste0(basepath,"/")))
+ws <- read_ws(directory = gcsdir,basepath = basepath)
+ws <- bind_rows(ws,read_ws(directory = temporary,basepath = basepath,temporary = TRUE))
+
 ```
 
 
 ```{r read_data,include=FALSE,cache=FALSE}
-for ( x in 1:nrow(ws) ) {
-  filename=as.character(ws[x,"filename"])
-  path=as.character(ws[x,"path"])
-  if ( file.exists(file.path(path,filename )) ) {
-    print(paste("Processing: ", filename))
-    if ( x == 1 ) {
-      # Read in the first list and set variable types
-      results <- read_excel(file.path(path,filename),
-                            sheet = "Complete responses")
-      results$tag <- as.character(ws[x,"tag"])
-      results$date <- as.character(ws[x,"date"])
-      results$source <- as.character(ws[x,"filename"])
-    } else {
-      # Read in the subsequent lists and set variable types
-      tmp <- read_excel(file.path(path,filename),
-                            sheet = "Complete responses")
-      tmp$tag <- as.character(ws[x,"tag"])
-      tmp$date <- as.character(ws[x,"date"])
-      tmp$source <- as.character(ws[x,"filename"])
-      # Add to master dataframe
-      results <- bind_rows(results,tmp)
-      rm(tmp)
-    }
-  }
-}
-
-# convert to factors
+# read in and standardize
+results <- read_data_from_ws(ws,standardizer_file = standardizer_file)
 ```
 
 
 ```{r clean_data,include=FALSE,cache=FALSE}
-# clean up a bit
 
 # get metadata 
 results %>% 
   group_by(source) %>%
   summarize(begintime=min(`Time (UTC)`),endtime=max(`Time (UTC)`)) %>%
   mutate(begindate=as.Date(begintime),enddate=as.Date(endtime)) -> dates.by.file
+
 dates.by.file %>% 
   ungroup() %>%
   summarize(begindate=min(begindate),enddate=max(enddate)) -> dates.final
+
 dates.final.begin <- pull(dates.final,begindate)
 dates.final.end <- pull(dates.final,enddate)
 
@@ -136,17 +111,7 @@ dates.final.end <- pull(dates.final,enddate)
 ws.with.dates <- left_join(ws,dates.by.file,by=c("filename" = "source"))
 results.final <- left_join(results,
                       ws.with.dates %>% select(filename,geography,language,begintime,endtime,begindate,enddate),
-                      by=c("source" = "filename")) %>% 
-  rename(rt_Q1_ms = `Response Time #1 (ms)`)   %>%
-  # recode French to English, Canada to US to generic
-  left_join(standardize_Q1) %>%
-  mutate(Q1 = factor(Q1_std,levels=c("less than 1 month",
-                                     "1-2 months",
-                                     "2-3 months",
-                                     "3-6 months",
-                                     "more than 6 months",
-                                     "My state/province has not implemented such rules."))) %>%
-  select(-Q1_std)
+                      by=c("source" = "filename")) 
 # this should check for NA.
 ```
 
@@ -163,11 +128,27 @@ We believe that this information is not otherwise available in a reliable and ti
 
 Please cite the data as 
 
-> Lange, Fabian and Lars Vilhuber. 2020. "Expectations about Continuation of Social Distancing Rules in COVID-19 Times [dataset]." (this URL)
+> Lange, Fabian and Lars Vilhuber. 2020. "`r rmarkdown::metadata$title` [dataset]." Available at `r publicurl` (accessed `r Sys.Date()`).
+
+```{r}
+# Expectations about Continuation of Social Distancing Rules in COVID-19 Times
+```
+
+Please cite this document as
+
+> Lange, Fabian and Lars Vilhuber. 2020. "Codebook for: `r rmarkdown::metadata$title`." Available at `r publicurl` (accessed `r Sys.Date()`).
+
+```{r link_to_pdf,results="asis"}
+if (knitr::is_html_output()) {
+    cat(paste0('This document is also available in PDF format at <a href="',publicurl.pdf,'">',publicurl.pdf,'</a>.'))
+}
+```
+
+
 
 We will be posting the data on Zenodo shortly. Data should be cite via DOI then.
 
-## List of files {.tabset .tabset-fade}
+## Available data {.tabset .tabset-fade}
 
 
 ### Final files
@@ -176,6 +157,8 @@ Final files are uploaded after each wave is completed. Filenames in [`final`](fi
 
 > `survey-[geography]-[language]-[question]-[date].xlsx`
 
+### List of files
+
 ```{r listfiles,results='asis'}
 ws %>% select(showpath,filename) %>% 
   mutate(Files=paste0("[",filename,"](",file.path(showpath,filename),")"))  %>%
@@ -183,6 +166,8 @@ ws %>% select(showpath,filename) %>%
 ```
 
 ### Temporary files
+
+Temporary files may be made available if a survey has not yet completed, but data are already available. 
 
 [`Temporary`](temporary/) files follow
 
@@ -195,15 +180,15 @@ ws %>% select(showpath,filename) %>%
 |  Topic | Answer |
 |--------|--------|
 | Geographic Coverage | United States of America, Canada |
-| Time  Periods | `r dates.final.begin` - `r dates.final.end`. |
-| Date of Collection | `r dates.final.begin` - `r dates.final.end`. |
+| Time  Periods | `r dates.final.begin` - `r dates.final.end` |
+| Date of Collection | `r dates.final.begin` - `r dates.final.end` |
 | Unit of Observation | Individual |
 | Description of Variables | `r names(results)[1:10] ` |
 
 
 ### Reference period
 
-The survey asks about point-in-time expectations. A new wave is launched every Friday. The list below provides the dates of collection for each wave. Currently, data are available covering the period between `r dates.final.begin` and `r dates.final.end`.
+The survey asks about point-in-time expectations. A new wave is launched every Friday. The list  provides the dates of collection for each wave. Currently, data are available covering the period between `r dates.final.begin` and `r dates.final.end`.
 
 ```{r}
 library(DT)
@@ -211,7 +196,7 @@ ws.with.dates %>%
   mutate(`Files` = file.path(showpath,filename)) %>%
   select(Files, begintime, endtime) %>% 
   arrange(begintime) %>%
-  datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
+  datatable(autoHideNavigation = TRUE)
 
 ```
 
@@ -223,8 +208,11 @@ This field will differ across the two types of files, geography, and languages. 
 
 ##### Standardized distribution
 
+The following tabulations are of unweighted data.
+
 ```{r graph, echo=FALSE}
 results.final %>% 
+  mutate(tag = if_else(tag %in% c("businesses","people"),tag,"temporary")) %>%
   ggplot(aes(Q1,color=tag,fill=tag)) +
   geom_histogram(stat="count",position="dodge",aes(label=..count..)) +
   theme_minimal() +
@@ -249,8 +237,8 @@ tmp <- left_join(results,
 
 tags <- c("business","people")
 
-print.part <- function(tagselect,geo,lang) {
-  tmp %>% filter(tag==tagselect & geography == geo & language == lang) %>% 
+print.part <- function(ds,tagselect,geo,lang) {
+  ds %>% filter(tag==tagselect & geography == geo & language == lang) %>% 
     mutate(percent = round(percent*100,2)) %>%
     ungroup() %>%
     select(-tag,-geography,-language) %>%
@@ -269,33 +257,37 @@ tabulate.var <- function(var,df=results.final) {
   mutate(percent = round(percent*100,2)) %>% return()
 }
 ```
+##### People, Canada, English
+
+```{r details_p_c_e}
+print.part(ds=tmp,tagselect = "people",geo = "canada",lang = "en")
+```
 
 ##### Business, Canada, French
 
 ```{r details_b_c_f}
-print.part("businesses","canada","fr")
+print.part(ds=tmp,tagselect = "businesses",geo = "canada",lang = "fr")
 ```
 
 ##### People, Canada, French
 
 ```{r details_p_c_f}
-print.part("people","canada","fr")
+print.part(ds=tmp,tagselect = "people",geo = "canada",lang = "fr")
 ```
 
 ##### Business, US, English
 
 ```{r details_b_u_e}
-print.part("businesses","us","en")
+print.part(ds=tmp,tagselect = "businesses",geo = "us",lang = "en")
 ```
 
 ##### People, US, English
 
 ```{r details_p_u_e}
-print.part("people","us","en")
+print.part(ds=tmp,tagselect = "people",geo = "us",lang = "en")
 ```
 
 
-(TO BE FILLED OUT)
 
 #### Age
 
@@ -492,7 +484,7 @@ The specific response rates are not known. @google_methodology_2020 reports resp
 
 ## License
 
-These data are licensed under a [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) license.
+These data are licensed under a [Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/) license. See [citation] for attribution.
 
 
 
