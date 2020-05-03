@@ -1,3 +1,5 @@
+![Update codebook](https://github.com/labordynamicsinstitute/covid19-expectations-data/workflows/Update%20codebook/badge.svg)
+
 # Uncertainty in times of COVID-19: Raw survey data
 
 Fabian Lange, Lars Vilhuber
