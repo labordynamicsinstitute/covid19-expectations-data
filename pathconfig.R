@@ -26,5 +26,8 @@ for ( dir in list(temporary,interwrk)){
 }
 
 # for web pages
+
 baseurl <- "https://labordynamicsinstitute.github.io/"
 gitname <- "covid19-expectations-data"
+
+
