@@ -7,6 +7,19 @@ source(file.path(rprojroot::find_root(rprojroot::has_file("pathconfig.R")),"path
 source(file.path(programs,"config.R"), echo=FALSE)
 source(file.path(programs,"global-libraries.R"), echo=FALSE)
 
+# for pandoc, when not running in Rstudio
+source(file.path(programs,"get_os.R"))
+pandoc.tmp <- Sys.getenv("RSTUDIO_PANDOC")
+if ( pandoc.tmp == "") {
+  print("setting pandoc path")
+  if ( get_os() == "osx" ) {
+    Sys.setenv(RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/MacOS/pandoc")
+  }
+  # add any other strange cases here
+  print(Sys.getenv("RSTUDIO_PANDOC"))
+}
+
+print(Sys.getenv("RSTUDIO_PANDOC"))
 
 render_report = function(document,country) {
   if ( country == "all") {
