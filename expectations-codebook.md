@@ -84,6 +84,15 @@ Final files are uploaded after each wave is completed. Filenames in [`final`](fi
 |[survey-us-en-people-20200429.xlsx](final/survey-us-en-people-20200429.xlsx)                 |
 |[survey-n5sfsllqzvhfynwm27fzj3l7tu.xlsx](temporary/survey-n5sfsllqzvhfynwm27fzj3l7tu.xlsx)   |
 
+### Normalized file (Stata)
+
+We provide a normalized Stata file with all surveys, recoded consistently.
+
+
+|Files                                        |
+|:--------------------------------------------|
+|[expectations.dta](derived/expectations.dta) |
+
 ### Temporary files
 
 Temporary files may be made available if a survey has not yet completed, but data are already available. 

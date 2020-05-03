@@ -11,6 +11,7 @@ setwd(basepath)
 raw <- file.path(basepath, "final")
 temporary <- file.path(basepath, "temporary")
 prelim <- file.path(basepath,"preliminary")
+derived <- file.path(basepath,"derived")
 interwrk <- file.path(basepath, "_scratch")
 programs <- file.path(basepath,"_programs")
 outputs <- interwrk

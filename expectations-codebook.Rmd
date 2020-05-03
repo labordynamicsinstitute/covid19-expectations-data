@@ -64,6 +64,7 @@ standardize_Q1 <- read_excel(standardizer_file,
 
 publicurl     <- file.path(baseurl,gitname)
 publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
+statafile     <- file.path(derived,"expectations.dta")
 
 ```
 
@@ -113,6 +114,11 @@ results.final <- left_join(results,
                       ws.with.dates %>% select(filename,geography,language,begintime,endtime,begindate,enddate),
                       by=c("source" = "filename")) 
 # this should check for NA.
+
+# output Stata file
+save.dta13(results.final,file = statafile,version = 15,
+          data.label =paste0("Expectations ",Sys.Date()))
+
 ```
 
 
@@ -161,6 +167,20 @@ Final files are uploaded after each wave is completed. Filenames in [`final`](fi
 
 ```{r listfiles,results='asis'}
 ws %>% select(showpath,filename) %>% 
+  mutate(Files=paste0("[",filename,"](",file.path(showpath,filename),")"))  %>%
+  select(Files) %>% kable()
+```
+
+### Normalized file (Stata)
+
+We provide a normalized Stata file with all surveys, recoded consistently.
+
+```{r liststata,results='asis'}
+
+enframe(list.files(derived,"*.dta")) %>% 
+    mutate(filename=value,path=derived) %>% 
+    mutate(showpath=str_remove(path,paste0(basepath,"/"))) %>% 
+  select(showpath,filename) %>% 
   mutate(Files=paste0("[",filename,"](",file.path(showpath,filename),")"))  %>%
   select(Files) %>% kable()
 ```
