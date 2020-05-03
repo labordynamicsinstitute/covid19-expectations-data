@@ -19,6 +19,8 @@ jobs:
     steps:
     - name: install wkhtml
       run: sudo apt-get install wkhtmltopdf xvfb
+    - name: install R dependencies
+      run: sudo apt-get install libcurl4-openssl-dev libxml2-dev
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
