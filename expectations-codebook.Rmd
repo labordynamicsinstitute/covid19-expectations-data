@@ -63,7 +63,7 @@ standardize_Q1 <- read_excel(standardizer_file,
                                  sheet = "Q1")
 
 publicurl     <- file.path(baseurl,gitname)
-publicurl.pdf <- file.path(publicurl,"README.pdf")
+publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
 
 ```
 
