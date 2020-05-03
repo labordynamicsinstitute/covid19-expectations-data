@@ -28,7 +28,7 @@ jobs:
 
     # Runs a set of commands using the runners shell
     - name: Run docker for R 
-      uses: docker://pandoc/rocker/r-rmd
+      uses: docker://rocker/r-rmd
       with:
           args: "Rscript --vanilla _programs/master.R "
           
