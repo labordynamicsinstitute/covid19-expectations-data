@@ -30,7 +30,7 @@ jobs:
 
     # Runs a set of commands using the runners shell
     - name: Run docker for R 
-      uses: docker://rocker/r-rmd
+      uses: docker://rocker/r-verse
       with:
           args: "Rscript --vanilla _programs/master.R "
           
