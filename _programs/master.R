@@ -9,7 +9,7 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args)>0) {
   if ( args[1] == "ubuntu" ) {
      system("sudo apt-get update")
-     system("sudo apt-get install libcurl4-openssl-dev libxml2-dev")
+     system("sudo apt-get install -y libcurl4-openssl-dev libxml2-dev")
     }
   }
 
