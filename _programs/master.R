@@ -2,6 +2,15 @@
 # This can be run from the command line as 
 #  Rscript --vanilla master.R 
 
+# capture command line arguments
+
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args)>0) {
+  if ( args[1] == "ubuntu" ) {
+     system("sudo apt-get install libcurl4-openssl-dev libxml2-dev")
+    }
+  }
 
 source(file.path(rprojroot::find_root(rprojroot::has_file("pathconfig.R")),"pathconfig.R"),echo=FALSE)
 source(file.path(programs,"config.R"), echo=FALSE)
