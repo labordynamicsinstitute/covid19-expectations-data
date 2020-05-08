@@ -35,9 +35,10 @@ render_report = function(document,country) {
   if ( country == "all") {
     print(paste0("Processing ",country))
     #setwd(text)
+    unlink(file.path(basepath,paste0(document,"_cache")),recursive=TRUE,force=TRUE)
     rmarkdown::render(
       file.path(basepath,paste0(document,".Rmd")), 
-      output_format = "all"
+      output_format = "all",
     )
   } else {
     print(paste0("Not implemented yet for  country: ",country))
