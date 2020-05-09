@@ -8,8 +8,23 @@ args = commandArgs(trailingOnly=TRUE)
 
 if (length(args)>0) {
   if ( args[1] == "ubuntu" ) {
-     system("sudo apt-get update")
-     system("sudo apt-get install -y libcurl4-openssl-dev libxml2-dev")
+     system("apt-get update")
+     system("apt-get install -y libcurl4-openssl-dev libxml2-dev")
+     system("apt-get install -y texlive-latex-recommended")
+     system("apt-get install -y texlive-fonts-recommended")
+     system("apt-get install -y texlive-latex-extra texlive-pictures")
+     system("apt-get install -y pandoc-citeproc")
+     system("apt-get install -y r-cran-rprojroot r-cran-tidyverse")
+     system("apt-get install -y r-cran-readxl ")
+     system("apt-get install -y r-cran-devtools ")
+     system("apt-get install -y r-cran-readstata13 ")
+     system("apt-get install -y r-cran-jsonlite ")
+     system("apt-get install -y r-cran-shiny ")
+     system("apt-get install -y r-cran-freetype ")
+     system("apt-get install -y r-cran-extrafont ")
+     system("apt-get install -y r-cran-mapproj ")
+     system("apt-get install -y r-cran-ggthemes ")
+     system("apt-get install -y r-cran-summarytools ")
     }
   }
 
