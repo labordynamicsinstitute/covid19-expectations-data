@@ -115,7 +115,7 @@ results.final <- left_join(results,
                       by=c("source" = "filename")) 
 # this should check for NA.
 
-save.RDS(results.final,file= file.path(derivedfile,".Rds"))
+saveRDS(results.final,file= file.path(derivedfile,".Rds"))
 # output Stata file
 save.dta13(results.final,file = file.path(derivedfile,".dta"),version = 15,
           data.label =paste0("Expectations ",Sys.Date()))
