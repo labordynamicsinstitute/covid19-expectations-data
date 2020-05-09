@@ -9,6 +9,14 @@ mysave <- function(object,filename,path=outputs,skipdta=FALSE) {
   }
 }
 
+# file names (no path)
+gcsresults <- "gcs_results"
+gcsprelim.results <- paste0(gcsresults,test.question.date)
+gcsprelim.list <- "gcs_prelim_list"
+gcsprelim.final.results <- paste0(gcsresults,prelim.question.date)
+gcsprelim.final.list <- "gcs_prelim_final_list"
+
+
 # Sources
 
 statcan_languages <- tibble::tibble(
