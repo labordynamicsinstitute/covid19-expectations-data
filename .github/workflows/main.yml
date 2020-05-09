@@ -37,9 +37,9 @@ jobs:
     - name: Convert HTML to PDF
       run: "/usr/bin/xvfb-run /usr/bin/wkhtmltopdf README.html README2.pdf"
     # send it up
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.4.9
-      with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: . # The folder the action should deploy.
+    - name: push files
+      uses: EndBug/add-and-commit@v4
+      with: 
+        message: '[noaction] Generated derived files'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
