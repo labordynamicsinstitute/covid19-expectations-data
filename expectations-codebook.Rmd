@@ -40,13 +40,6 @@ prelim.question.date <- "20200421" # date we downloaded the final results from t
 planned.n = 250 
 target = 2500 # per question
 
-# file names (no path)
-gcsresults <- "gcs_results"
-gcsprelim.results <- paste0(gcsresults,test.question.date)
-gcsprelim.list <- "gcs_prelim_list"
-gcsprelim.final.results <- paste0(gcsresults,prelim.question.date)
-gcsprelim.final.list <- "gcs_prelim_final_list"
-
 # Download Zotero bibliography
 zotero.grp <- 2484699
 zotero.api <- "https://api.zotero.org/groups/"
@@ -62,64 +55,15 @@ standardizer_file <- file.path(basepath,"auxiliary","standardize_values.xlsx")
 standardize_Q1 <- read_excel(standardizer_file,
                                  sheet = "Q1")
 
-publicurl     <- file.path(baseurl,gitname)
 publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
-derivedfile     <- file.path(derived,"expectations")
 
 ```
 
-```{r read_list,include=FALSE,cache=FALSE}
-# Compile all the worksheets 
-gcsdir_prelim <- prelim
-ws.prelim <- 
-  enframe(list.files(gcsdir_prelim,"*.xlsx")) %>% 
-  mutate(filename=value,path=gcsdir_prelim) %>%
-  separate(value,c("drop","tag","date","time"),sep="-") %>%
-  separate(time,c("time"),extra = "drop") %>% 
-  select(-drop,-name) %>%
-  mutate(type="preliminary") %>%
-  mutate(showpath=str_remove(path,paste0(basepath,"/")))
-
-# different tag sets for final data: survey-canada-fr-businesses-20200426.xlsx
-ws <- read_ws(directory = gcsdir,basepath = basepath)
-ws <- bind_rows(ws,read_ws(directory = temporary,basepath = basepath,temporary = TRUE))
-
-```
-
-
-```{r read_data,include=FALSE,cache=FALSE}
-# read in and standardize
-results <- read_data_from_ws(ws,standardizer_file = standardizer_file)
-```
-
-
-```{r clean_data,include=FALSE,cache=FALSE}
-
-# get metadata 
-results %>% 
-  group_by(source) %>%
-  summarize(begintime=min(`Time (UTC)`),endtime=max(`Time (UTC)`)) %>%
-  mutate(begindate=as.Date(begintime),enddate=as.Date(endtime)) -> dates.by.file
-
-dates.by.file %>% 
-  ungroup() %>%
-  summarize(begindate=min(begindate),enddate=max(enddate)) -> dates.final
-
-dates.final.begin <- pull(dates.final,begindate)
-dates.final.end <- pull(dates.final,enddate)
-
-# merge dates.by.file back onto ws
-ws.with.dates <- left_join(ws,dates.by.file,by=c("filename" = "source"))
-results.final <- left_join(results,
-                      ws.with.dates %>% select(filename,geography,language,begintime,endtime,begindate,enddate),
-                      by=c("source" = "filename")) 
-# this should check for NA.
-
-saveRDS(results.final,file= paste0(derivedfile,".Rds"))
-# output Stata file
-save.dta13(results.final,file = paste0(derivedfile,".dta"),version = 15,
-          data.label =paste0("Expectations ",Sys.Date()))
-
+```{r read_clean_data,include=FALSE,cache=FALSE}
+# this reads it all in, 
+source(file.path(programs),"read_clean_data.R", echo = TRUE)
+# this saves it
+source(file.path(programs),"convert_save_data.R", echo = TRUE)
 ```
 
 

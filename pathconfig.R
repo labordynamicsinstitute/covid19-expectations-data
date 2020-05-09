@@ -30,5 +30,13 @@ for ( dir in list(temporary,interwrk)){
 
 baseurl <- "https://labordynamicsinstitute.github.io/"
 gitname <- "covid19-expectations-data"
+publicurl     <- file.path(baseurl,gitname)
+derivedfile     <- file.path(derived,"expectations")
 
+# file names (no path)
+gcsresults <- "gcs_results"
+gcsprelim.results <- paste0(gcsresults,test.question.date)
+gcsprelim.list <- "gcs_prelim_list"
+gcsprelim.final.results <- paste0(gcsresults,prelim.question.date)
+gcsprelim.final.list <- "gcs_prelim_final_list"
 
