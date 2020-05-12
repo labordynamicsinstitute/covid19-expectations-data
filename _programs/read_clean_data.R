@@ -40,6 +40,9 @@ dates.final.end <- pull(dates.final,enddate)
 ws.with.dates <- left_join(ws,dates.by.file,by=c("filename" = "source"))
 results.final <- left_join(results,
                       ws.with.dates %>% select(filename,geography,language,begintime,endtime,begindate,enddate),
-                      by=c("source" = "filename")) 
+                      by=c("source" = "filename")) %>%
+  separate(Geography,c("Country","Region","State/Province","City"),
+           sep="-",remove=FALSE,fill="right") %>%
+  replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State/Province` = "ZZ Unknown"))
 # this should check for NA.
 

@@ -10,6 +10,9 @@ mysave <- function(object,filename,path=outputs,skipdta=FALSE) {
 }
 
 # file names (no path)
+test.question.date <- "20200412"
+prelim.question.date <- "20200421" # date we downloaded the final results from the test.
+
 gcsresults <- "gcs_results"
 gcsprelim.results <- paste0(gcsresults,test.question.date)
 gcsprelim.list <- "gcs_prelim_list"

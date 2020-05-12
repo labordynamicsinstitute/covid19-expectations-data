@@ -34,8 +34,7 @@ source(file.path(programs,"global-libraries.R"),echo=TRUE)
 source(file.path(programs,"config.R"),echo=TRUE)
 source(file.path(programs,"common-functions.R"),echo=TRUE)
 
-test.question.date <- "20200412"
-prelim.question.date <- "20200421" # date we downloaded the final results from the test.
+
 
 planned.n = 250 
 target = 2500 # per question
@@ -61,9 +60,9 @@ publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
 
 ```{r read_clean_data,include=FALSE,cache=FALSE}
 # this reads it all in, 
-source(file.path(programs),"read_clean_data.R", echo = TRUE)
+source(file.path(programs,"read_clean_data.R"), echo = TRUE)
 # this saves it
-source(file.path(programs),"convert_save_data.R", echo = TRUE)
+source(file.path(programs,"convert_save_data.R"), echo = TRUE)
 ```
 
 
@@ -273,9 +272,7 @@ Geography is as coded by Google Surveys. Precision may vary, having country, reg
 Distribution across countries
 
 ```{r details_country}
-results.final %>% select(Geography) %>%
-  separate(Geography,c("Country","Region","State/Province","City"),sep="-") %>%
-  replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State/Province` = "ZZ Unknown")) -> geo
+results.final  -> geo
 tabulate.var(Country,df=geo) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
 ```
 
