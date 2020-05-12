@@ -115,13 +115,13 @@ ws %>% select(showpath,filename) %>%
   select(Files) %>% kable()
 ```
 
-### Normalized file (Stata)
+### Normalized files
 
-We provide a normalized Stata file with all surveys, recoded consistently.
+We provide a normalized Stata and R (`Rds`) file with all surveys, recoded consistently.
 
 ```{r liststata,results='asis'}
 
-enframe(list.files(derived,"*.dta")) %>% 
+enframe(list.files(derived,"*")) %>% 
     mutate(filename=value,path=derived) %>% 
     mutate(showpath=str_remove(path,paste0(basepath,"/"))) %>% 
   select(showpath,filename) %>% 
@@ -189,23 +189,21 @@ results.final %>%
 
 
 ```{r q1details, include=FALSE}
-tmp <- left_join(results,
-                      ws.with.dates %>% select(filename,geography,language),
-                      by=c("source" = "filename")) %>%
+tmp <- results.final %>%
   # insert Québec into Canada
-  mutate(geography = recode(geography,"qc" = "canada")) %>%
-  group_by(tag,geography,language,`Question #1 Answer`) %>%
+  mutate(geotag = recode(geotag,"qc" = "canada")) %>%
+  group_by(tag,geotag,language,`Question #1 Answer`) %>%
   summarise(count=n()) %>% 
-  group_by(tag,geography,language) %>%
+  group_by(tag,geotag,language) %>%
   mutate(percent = count / sum(count)) 
 
 tags <- c("business","people")
 
 print.part <- function(ds,tagselect,geo,lang) {
-  ds %>% filter(tag==tagselect & geography == geo & language == lang) %>% 
+  ds %>% filter(tag==tagselect & geotag == geo & language == lang) %>% 
     mutate(percent = round(percent*100,2)) %>%
     ungroup() %>%
-    select(-tag,-geography,-language) %>%
+    select(-tag,-geotag,-language) %>%
   kable() %>%
   return()
 }
@@ -269,6 +267,17 @@ tabulate.var(Gender) %>% kable()
 
 Geography is as coded by Google Surveys. Precision may vary, having country, region, province, and sometimes city.
 
+
+##### Detailed geography
+
+The variable `Geography` corresponds to the geography as captured and recorded by Google. All other geography variables are derived from this variable, and are only available on the [normalized files](#normalized-files).
+
+```{r details_geography}
+tabulate.var(Geography) %>% datatable() 
+```
+
+##### Country
+
 Distribution across countries
 
 ```{r details_country}
@@ -276,21 +285,23 @@ results.final  -> geo
 tabulate.var(Country,df=geo) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
 ```
 
-##### Regions
+##### Region
 
-Regions may be single states or provinces, or larger collections.
+Regions may be single states or provinces, or larger collections. They may correspond to US Census regions or [Statistics Canada regions](`r statcan_geocodes$url`).
 
 ```{r details_regions}
 tabulate.var(Region,df=geo) %>% datatable(autoHideNavigation = TRUE)
 ```
 
-##### States/Provinces
+##### States/Province
+
+States and provinces are codes as two-letter postal abbreviation on the original data files. On derived files, `geonum`  contains the numeric FIPS or [province code](`r statcan_geocodes$url`) (coded as character to preserve leading zeros), and as a full name (`geoname`). Note that the Google-provided `Region` often, but not always corresponds to a state or province, whereas `State/Province`, `geonum`, `geoname` always correspond to state/province.
 
 ```{r details_state_province}
 tabulate.var(`State/Province`,df=geo) %>% datatable(autoHideNavigation = TRUE)
 ```
 
-##### Cities
+##### City
 
 In some cases, details is available at the city level.
 
@@ -299,11 +310,6 @@ tabulate.var(City,df=geo) %>% datatable(autoHideNavigation = TRUE)
 ```
 
 
-##### Detailed geography
-
-```{r details_geography}
-tabulate.var(Geography) %>% datatable() 
-```
 
 #### Weight
 
@@ -344,7 +350,7 @@ Data files are available for each completed cycle of the survey, in general once
 
 ### Data format
 
-Native format is Excel (XLSX). 
+Native format is Office Open XML (XLSX, @ecma_international_standard_2016 ). Normalized files are available in Stata and R formats.
 
 Files are provided as downloaded from Google Surveys. Each file has 4 tabs.
 
