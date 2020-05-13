@@ -49,10 +49,6 @@ zotero.url <- paste0(zotero.url.base,zotero.grp,"/",zotero.url.suffix,"/library"
 download.file(paste0(zotero.api,zotero.grp,"/items?format=bibtex"),
               file.path("from_zotero.bib"))
 
-# read in the standardizer mapping
-standardizer_file <- file.path(basepath,"auxiliary","standardize_values.xlsx")
-standardize_Q1 <- read_excel(standardizer_file,
-                                 sheet = "Q1")
 
 publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
 
@@ -60,9 +56,9 @@ publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
 
 ```{r read_clean_data,include=FALSE,cache=FALSE}
 # this reads it all in, 
-source(file.path(programs,"read_clean_data.R"), echo = TRUE)
+source(file.path(programs,"read_clean_data.R"), echo = TRUE, local=FALSE)
 # this saves it
-source(file.path(programs,"convert_save_data.R"), echo = TRUE)
+source(file.path(programs,"convert_save_data.R"), echo = TRUE, local=FALSE)
 ```
 
 

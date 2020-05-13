@@ -30,3 +30,6 @@ statcan_geocodes <- tibble::tibble(
   url = "https://www12.statcan.gc.ca/census-recensement/2011/ref/dict/table-tableau/table-tableau-8-eng.cfm",
   date = "2020-05-12",
   file = "statcan_regions_2011_table8.xlsx")
+
+# standardizer mapping
+standardizer_file <- file.path(basepath,"auxiliary","standardize_values.xlsx")

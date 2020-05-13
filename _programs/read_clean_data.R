@@ -5,6 +5,8 @@
 #'  - function read_data_from_ws()
 #'  - standardizer_file
 
+source(file.path(programs,"config.R"), echo=FALSE)
+
 # Compile all the worksheets 
 gcsdir_prelim <- prelim
 ws.prelim <- 
