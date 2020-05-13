@@ -22,7 +22,7 @@ jobs:
     # - name: install R dependencies
     #  run: sudo apt-get install libcurl4-openssl-dev libxml2-dev
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v1
 
     # Runs a single command using the runners shell
     - name: Create temp directory
@@ -48,4 +48,4 @@ jobs:
       with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: . # The folder the action should deploy.
+          FOLDER: ./ # The folder the action should deploy.
