@@ -1,7 +1,7 @@
 ---
 title: "Uncertainty in times of COVID-19: Raw survey data"
 author: "Fabian Lange, Lars Vilhuber"
-date: "2020-05-12"
+date: "2020-05-13"
 always_allow_html: true
 output:
   html_document: 
@@ -41,13 +41,13 @@ We believe that this information is not otherwise available in a reliable and ti
 
 Please cite the data as 
 
-> Lange, Fabian and Lars Vilhuber. 2020. "Uncertainty in times of COVID-19: Raw survey data [dataset]." Available at https://labordynamicsinstitute.github.io//covid19-expectations-data (accessed 2020-05-12).
+> Lange, Fabian and Lars Vilhuber. 2020. "Uncertainty in times of COVID-19: Raw survey data [dataset]." Available at https://labordynamicsinstitute.github.io//covid19-expectations-data (accessed 2020-05-13).
 
 
 
 Please cite this document as
 
-> Lange, Fabian and Lars Vilhuber. 2020. "Codebook for: Uncertainty in times of COVID-19: Raw survey data." Available at https://labordynamicsinstitute.github.io//covid19-expectations-data (accessed 2020-05-12).
+> Lange, Fabian and Lars Vilhuber. 2020. "Codebook for: Uncertainty in times of COVID-19: Raw survey data." Available at https://labordynamicsinstitute.github.io//covid19-expectations-data (accessed 2020-05-13).
 
 This document is also available in PDF format at <a href="https://labordynamicsinstitute.github.io//covid19-expectations-data/expectations-codebook.pdf">https://labordynamicsinstitute.github.io//covid19-expectations-data/expectations-codebook.pdf</a>.
 
@@ -268,7 +268,7 @@ In some cases, details is available at the city level.
 
 #### Weight
 
-See elsewhere in this document how weights are computed.
+See [elsewhere in this document](#weighting) how weights are computed.
 
 <!--html_preserve--><div id="htmlwidget-8fd9e2c5efb3306e860b" style="width:100%;height:auto;" class="datatables html-widget"></div>
 <script type="application/json" data-for="htmlwidget-8fd9e2c5efb3306e860b">{"x":{"filter":"none","autoHideNavigation":true,"data":[["Mean","Std.Dev","Min","Median","Max","N.Valid","Pct.Valid"],[0.783832267888777,0.696868022619437,0,0.813972,25.9246461,26757,100]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Weight<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","columnDefs":[{"targets":1,"render":"function(data, type, row, meta) { return DTWidget.formatRound(data, 4, 3, \",\", \".\"); }"},{"className":"dt-right","targets":1},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":["options.columnDefs.0.render"],"jsHooks":[]}</script><!--/html_preserve-->
@@ -371,6 +371,10 @@ For 2016, 20.4% spoke French and no English as the language spoken most often at
 ### Imputation
 
 All demographics are imputed by Google Surveys, if collected via web. Demographics for respondents via the app are collected through the app. 
+
+### Weighting 
+
+Weights are provided by Google Surveys, based on the imputed demographics. For the US, the US Census Bureau's [Current Population Survey (CPS) Computer and Internet Use Supplement](https://www.census.gov/programs-surveys/cps/technical-documentation/complete.2017.html) is used (currently the 2017 version). For Canada, @google_methodology_2020 points to a "combination of government data and internal Google data sources." Google uses  post-stratification weighting to align the weighted demographics with the target population. 
 
 ### Quality evaluation
 

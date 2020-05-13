@@ -11,7 +11,7 @@
 
 <meta name="author" content="Fabian Lange, Lars Vilhuber" />
 
-<meta name="date" content="2020-05-12" />
+<meta name="date" content="2020-05-13" />
 
 <title>Uncertainty in times of COVID-19: Raw survey data</title>
 
@@ -271,7 +271,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Uncertainty in times of COVID-19: Raw survey data</h1>
 <h4 class="author">Fabian Lange, Lars Vilhuber</h4>
-<h4 class="date">2020-05-12</h4>
+<h4 class="date">2020-05-13</h4>
 
 </div>
 
@@ -285,11 +285,11 @@ div.tocify {
 <h3>Citation</h3>
 <p>Please cite the data as</p>
 <blockquote>
-<p>Lange, Fabian and Lars Vilhuber. 2020. “Uncertainty in times of COVID-19: Raw survey data [dataset].” Available at <a href="https://labordynamicsinstitute.github.io//covid19-expectations-data" class="uri">https://labordynamicsinstitute.github.io//covid19-expectations-data</a> (accessed 2020-05-12).</p>
+<p>Lange, Fabian and Lars Vilhuber. 2020. “Uncertainty in times of COVID-19: Raw survey data [dataset].” Available at <a href="https://labordynamicsinstitute.github.io//covid19-expectations-data" class="uri">https://labordynamicsinstitute.github.io//covid19-expectations-data</a> (accessed 2020-05-13).</p>
 </blockquote>
 <p>Please cite this document as</p>
 <blockquote>
-<p>Lange, Fabian and Lars Vilhuber. 2020. “Codebook for: Uncertainty in times of COVID-19: Raw survey data.” Available at <a href="https://labordynamicsinstitute.github.io//covid19-expectations-data" class="uri">https://labordynamicsinstitute.github.io//covid19-expectations-data</a> (accessed 2020-05-12).</p>
+<p>Lange, Fabian and Lars Vilhuber. 2020. “Codebook for: Uncertainty in times of COVID-19: Raw survey data.” Available at <a href="https://labordynamicsinstitute.github.io//covid19-expectations-data" class="uri">https://labordynamicsinstitute.github.io//covid19-expectations-data</a> (accessed 2020-05-13).</p>
 </blockquote>
 <p>This document is also available in PDF format at <a href="https://labordynamicsinstitute.github.io//covid19-expectations-data/expectations-codebook.pdf">https://labordynamicsinstitute.github.io//covid19-expectations-data/expectations-codebook.pdf</a>.</p>
 <p>We will be posting the data on Zenodo shortly. Data should be cite via DOI then.</p>
@@ -785,7 +785,7 @@ div.tocify {
 </div>
 <div id="weight" class="section level4">
 <h4>Weight</h4>
-<p>See elsewhere in this document how weights are computed.</p>
+<p>See <a href="#weighting">elsewhere in this document</a> how weights are computed.</p>
 <div id="htmlwidget-8fd9e2c5efb3306e860b" style="width:100%;height:auto;" class="datatables html-widget"></div>
 <script type="application/json" data-for="htmlwidget-8fd9e2c5efb3306e860b">{"x":{"filter":"none","autoHideNavigation":true,"data":[["Mean","Std.Dev","Min","Median","Max","N.Valid","Pct.Valid"],[0.783832267888777,0.696868022619437,0,0.813972,25.9246461,26757,100]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Weight<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"dom":"t","columnDefs":[{"targets":1,"render":"function(data, type, row, meta) { return DTWidget.formatRound(data, 4, 3, \",\", \".\"); }"},{"className":"dt-right","targets":1},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":["options.columnDefs.0.render"],"jsHooks":[]}</script>
 </div>
@@ -879,6 +879,10 @@ div.tocify {
 <div id="imputation" class="section level3">
 <h3>Imputation</h3>
 <p>All demographics are imputed by Google Surveys, if collected via web. Demographics for respondents via the app are collected through the app.</p>
+</div>
+<div id="weighting" class="section level3">
+<h3>Weighting</h3>
+<p>Weights are provided by Google Surveys, based on the imputed demographics. For the US, the US Census Bureau’s <a href="https://www.census.gov/programs-surveys/cps/technical-documentation/complete.2017.html">Current Population Survey (CPS) Computer and Internet Use Supplement</a> is used (currently the 2017 version). For Canada, <span class="citation">Google (2020)</span> points to a “combination of government data and internal Google data sources.” Google uses post-stratification weighting to align the weighted demographics with the target population.</p>
 </div>
 <div id="quality-evaluation" class="section level3">
 <h3>Quality evaluation</h3>

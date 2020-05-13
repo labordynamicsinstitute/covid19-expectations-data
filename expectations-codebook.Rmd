@@ -4,6 +4,10 @@ author: "Fabian Lange, Lars Vilhuber"
 date: "`r Sys.Date()`"
 always_allow_html: true
 output:
+  pdf_document:
+    includes:
+      in_header: _includes/header.tex
+    toc: yes
   html_document: 
     includes:
       before_body: _includes/header.html
@@ -14,10 +18,6 @@ output:
     toc_float: yes
     df_print: paged
     lib_dir: libs
-  pdf_document:
-    includes:
-      in_header: _includes/header.tex
-    toc: yes
 editor_options:
   chunk_output_type: console
 bibliography: from_zotero.bib
@@ -313,7 +313,7 @@ tabulate.var(City,df=geo) %>% datatable(autoHideNavigation = TRUE)
 
 #### Weight
 
-See elsewhere in this document how weights are computed.
+See [elsewhere in this document](#weighting) how weights are computed.
 
 ```{r details_weights,warning=FALSE,echo=FALSE,error=FALSE,message=FALSE}
 library(summarytools)
@@ -436,6 +436,10 @@ For 2016, `r frenchpct*100`% spoke French and no English as the language spoken 
 ### Imputation
 
 All demographics are imputed by Google Surveys, if collected via web. Demographics for respondents via the app are collected through the app. 
+
+### Weighting 
+
+Weights are provided by Google Surveys, based on the imputed demographics. For the US, the US Census Bureau's [Current Population Survey (CPS) Computer and Internet Use Supplement](https://www.census.gov/programs-surveys/cps/technical-documentation/complete.2017.html) is used (currently the 2017 version). For Canada, @google_methodology_2020 points to a "combination of government data and internal Google data sources." Google uses  post-stratification weighting to align the weighted demographics with the target population. 
 
 ### Quality evaluation
 
