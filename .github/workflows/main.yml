@@ -43,9 +43,14 @@ jobs:
     #    message: '[noaction] Generated derived files'
     #  env:
     #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.4.9
-      with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: ./ # The folder the action should deploy.
+    - name: Manual deploy to Github Page
+      run: |
+          git checkout -b gh-pages
+          git commit -m 'Deploying to gh-pages' -a
+          git push origin gh-pages --force
+    # - name: Deploy to GitHub Pages
+    #   uses: JamesIves/github-pages-deploy-action@3.4.9
+    #   with:
+    #       ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+    #       BRANCH: gh-pages # The branch the action should deploy to.
+    #       FOLDER: ./ # The folder the action should deploy.
