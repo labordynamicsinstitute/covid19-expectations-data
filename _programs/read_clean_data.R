@@ -5,6 +5,8 @@
 #'  - function read_data_from_ws()
 #'  - standardizer_file
 
+source(file.path(programs,"config.R"), echo=FALSE)
+
 # Compile all the worksheets 
 gcsdir_prelim <- prelim
 ws.prelim <- 
@@ -38,8 +40,33 @@ dates.final.end <- pull(dates.final,enddate)
 
 # merge dates.by.file back onto ws
 ws.with.dates <- left_join(ws,dates.by.file,by=c("filename" = "source"))
-results.final <- left_join(results,
-                      ws.with.dates %>% select(filename,geography,language,begintime,endtime,begindate,enddate),
-                      by=c("source" = "filename")) 
+
+# standardize, and geocode
+can_geocodes_file <- file.path(basepath,"auxiliary",statcan_geocodes$file)
+
+can_geocodes <- read_excel(can_geocodes_file,sheet = "Codes")
+
+results.tmp <- left_join(results,
+                      ws.with.dates %>% select(filename,geotag,language,begintime,endtime,begindate,enddate),
+                      by=c("source" = "filename")) %>%
+  separate(Geography,c("Country","Region","State/Province","City"),
+           sep="-",remove=FALSE,fill="right") %>%
+  replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State/Province` = "ZZ Unknown"))
+
+# geocoding
+geocodes_us <- results.tmp %>% filter(Country == "US") %>% select(`State/Province`) %>% distinct()
+geocodes_us$geonum <- usmap::fips(geocodes_us$`State/Province`)
+geocodes_us$geoname <- usmap::fips_info(geocodes_us$geonum)$full
+
+geocodes_ca <- results.tmp %>% filter(Country == "CA") %>% select(`State/Province`) %>% distinct() %>%
+  left_join(can_geocodes,by=c(`State/Province` = "Alpha")) %>% 
+  select(`State/Province`,geonum = SGC,geoname = "Province/Territory") %>%
+  mutate(geonum = as.character(geonum))
+
+results.final <- left_join(results.tmp,geocodes_us,by=c("State/Province")) %>%
+                 left_join(geocodes_ca,by=c("State/Province")) %>%
+                 mutate(geonum = if_else(Country == "US",geonum.x,geonum.y),
+                        geoname= if_else(Country == "US",geoname.x,geoname.y)) %>%
+                select(-geonum.x,-geonum.y,-geoname.x,-geoname.y)
 # this should check for NA.
 

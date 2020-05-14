@@ -4,6 +4,10 @@ author: "Fabian Lange, Lars Vilhuber"
 date: "`r Sys.Date()`"
 always_allow_html: true
 output:
+  pdf_document:
+    includes:
+      in_header: _includes/header.tex
+    toc: yes
   html_document: 
     includes:
       before_body: _includes/header.html
@@ -14,10 +18,6 @@ output:
     toc_float: yes
     df_print: paged
     lib_dir: libs
-  pdf_document:
-    includes:
-      in_header: _includes/header.tex
-    toc: yes
 editor_options:
   chunk_output_type: console
 bibliography: from_zotero.bib
@@ -34,8 +34,7 @@ source(file.path(programs,"global-libraries.R"),echo=TRUE)
 source(file.path(programs,"config.R"),echo=TRUE)
 source(file.path(programs,"common-functions.R"),echo=TRUE)
 
-test.question.date <- "20200412"
-prelim.question.date <- "20200421" # date we downloaded the final results from the test.
+
 
 planned.n = 250 
 target = 2500 # per question
@@ -50,10 +49,6 @@ zotero.url <- paste0(zotero.url.base,zotero.grp,"/",zotero.url.suffix,"/library"
 download.file(paste0(zotero.api,zotero.grp,"/items?format=bibtex"),
               file.path("from_zotero.bib"))
 
-# read in the standardizer mapping
-standardizer_file <- file.path(basepath,"auxiliary","standardize_values.xlsx")
-standardize_Q1 <- read_excel(standardizer_file,
-                                 sheet = "Q1")
 
 publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
 
@@ -61,9 +56,9 @@ publicurl.pdf <- file.path(publicurl,"expectations-codebook.pdf")
 
 ```{r read_clean_data,include=FALSE,cache=FALSE}
 # this reads it all in, 
-source(file.path(programs),"read_clean_data.R", echo = TRUE)
+source(file.path(programs,"read_clean_data.R"), echo = TRUE, local=FALSE)
 # this saves it
-source(file.path(programs),"convert_save_data.R", echo = TRUE)
+source(file.path(programs,"convert_save_data.R"), echo = TRUE, local=FALSE)
 ```
 
 
@@ -116,13 +111,13 @@ ws %>% select(showpath,filename) %>%
   select(Files) %>% kable()
 ```
 
-### Normalized file (Stata)
+### Normalized files
 
-We provide a normalized Stata file with all surveys, recoded consistently.
+We provide a normalized Stata and R (`Rds`) file with all surveys, recoded consistently.
 
 ```{r liststata,results='asis'}
 
-enframe(list.files(derived,"*.dta")) %>% 
+enframe(list.files(derived,"*")) %>% 
     mutate(filename=value,path=derived) %>% 
     mutate(showpath=str_remove(path,paste0(basepath,"/"))) %>% 
   select(showpath,filename) %>% 
@@ -190,23 +185,21 @@ results.final %>%
 
 
 ```{r q1details, include=FALSE}
-tmp <- left_join(results,
-                      ws.with.dates %>% select(filename,geography,language),
-                      by=c("source" = "filename")) %>%
+tmp <- results.final %>%
   # insert Québec into Canada
-  mutate(geography = recode(geography,"qc" = "canada")) %>%
-  group_by(tag,geography,language,`Question #1 Answer`) %>%
+  mutate(geotag = recode(geotag,"qc" = "canada")) %>%
+  group_by(tag,geotag,language,`Question #1 Answer`) %>%
   summarise(count=n()) %>% 
-  group_by(tag,geography,language) %>%
+  group_by(tag,geotag,language) %>%
   mutate(percent = count / sum(count)) 
 
 tags <- c("business","people")
 
 print.part <- function(ds,tagselect,geo,lang) {
-  ds %>% filter(tag==tagselect & geography == geo & language == lang) %>% 
+  ds %>% filter(tag==tagselect & geotag == geo & language == lang) %>% 
     mutate(percent = round(percent*100,2)) %>%
     ungroup() %>%
-    select(-tag,-geography,-language) %>%
+    select(-tag,-geotag,-language) %>%
   kable() %>%
   return()
 }
@@ -270,30 +263,41 @@ tabulate.var(Gender) %>% kable()
 
 Geography is as coded by Google Surveys. Precision may vary, having country, region, province, and sometimes city.
 
+
+##### Detailed geography
+
+The variable `Geography` corresponds to the geography as captured and recorded by Google. All other geography variables are derived from this variable, and are only available on the [normalized files](#normalized-files).
+
+```{r details_geography}
+tabulate.var(Geography) %>% datatable() 
+```
+
+##### Country
+
 Distribution across countries
 
 ```{r details_country}
-results.final %>% select(Geography) %>%
-  separate(Geography,c("Country","Region","State/Province","City"),sep="-") %>%
-  replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State/Province` = "ZZ Unknown")) -> geo
+results.final  -> geo
 tabulate.var(Country,df=geo) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't'))
 ```
 
-##### Regions
+##### Region
 
-Regions may be single states or provinces, or larger collections.
+Regions may be single states or provinces, or larger collections. They may correspond to US Census regions or [Statistics Canada regions](`r statcan_geocodes$url`).
 
 ```{r details_regions}
 tabulate.var(Region,df=geo) %>% datatable(autoHideNavigation = TRUE)
 ```
 
-##### States/Provinces
+##### States/Province
+
+States and provinces are codes as two-letter postal abbreviation on the original data files. On derived files, `geonum`  contains the numeric FIPS or [province code](`r statcan_geocodes$url`) (coded as character to preserve leading zeros), and as a full name (`geoname`). Note that the Google-provided `Region` often, but not always corresponds to a state or province, whereas `State/Province`, `geonum`, `geoname` always correspond to state/province.
 
 ```{r details_state_province}
 tabulate.var(`State/Province`,df=geo) %>% datatable(autoHideNavigation = TRUE)
 ```
 
-##### Cities
+##### City
 
 In some cases, details is available at the city level.
 
@@ -302,15 +306,10 @@ tabulate.var(City,df=geo) %>% datatable(autoHideNavigation = TRUE)
 ```
 
 
-##### Detailed geography
-
-```{r details_geography}
-tabulate.var(Geography) %>% datatable() 
-```
 
 #### Weight
 
-See elsewhere in this document how weights are computed.
+See [elsewhere in this document](#weighting) how weights are computed.
 
 ```{r details_weights,warning=FALSE,echo=FALSE,error=FALSE,message=FALSE}
 library(summarytools)
@@ -347,7 +346,7 @@ Data files are available for each completed cycle of the survey, in general once
 
 ### Data format
 
-Native format is Excel (XLSX). 
+Native format is Office Open XML (XLSX, @ecma_international_standard_2016 ). Normalized files are available in Stata and R formats.
 
 Files are provided as downloaded from Google Surveys. Each file has 4 tabs.
 
@@ -433,6 +432,10 @@ For 2016, `r frenchpct*100`% spoke French and no English as the language spoken 
 ### Imputation
 
 All demographics are imputed by Google Surveys, if collected via web. Demographics for respondents via the app are collected through the app. 
+
+### Weighting 
+
+Weights are provided by Google Surveys, based on the imputed demographics. For the US, the US Census Bureau's [Current Population Survey (CPS) Computer and Internet Use Supplement](https://www.census.gov/programs-surveys/cps/technical-documentation/complete.2017.html) is used (currently the 2017 version). For Canada, @google_methodology_2020 points to a "combination of government data and internal Google data sources." Google uses  post-stratification weighting to align the weighted demographics with the target population. 
 
 ### Quality evaluation
 

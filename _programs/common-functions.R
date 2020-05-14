@@ -14,7 +14,7 @@ read_ws <- function(directory,basepath,temporary = FALSE) {
     mutate(type="temporary",date=as.character(format(Sys.Date(),"%Y%m%d"))) %>%
     select(-drop,-name) 
   } else {
-    ws <- ws %>% separate(value,c("drop","geography","language","tag","dateext"),sep="-") %>%
+    ws <- ws %>% separate(value,c("drop","geotag","language","tag","dateext"),sep="-") %>%
       separate(dateext,c("date","extension"))  %>%
       mutate(type="regular") %>%
       select(-drop,-name) 
