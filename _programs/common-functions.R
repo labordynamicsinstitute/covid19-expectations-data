@@ -23,10 +23,7 @@ read_ws <- function(directory,basepath,temporary = FALSE) {
   return(ws)
 }
 
-read_data_from_ws <- function (ws,standardizer_file,standardizer_sheet="Q1") {
-  # read in the standardizer
-  standardize_Q1 <- read_excel(standardizer_file,
-                               sheet = standardizer_sheet)
+read_data_from_ws <- function (ws,ws_sheet="Complete responses",standardize=TRUE,standardizer_file="",standardizer_sheet="Q1") {
   results <- data.frame()
   for ( x in 1:nrow(ws) ) {
     filename=as.character(ws[x,"filename"])
@@ -36,17 +33,19 @@ read_data_from_ws <- function (ws,standardizer_file,standardizer_sheet="Q1") {
       if ( x == 1 ) {
         # Read in the first list and set variable types
         results <- read_excel(file.path(path,filename),
-                              sheet = "Complete responses")
+                              sheet = ws_sheet)
         results$tag <- as.character(ws[x,"tag"])
         results$date <- as.character(ws[x,"date"])
         results$source <- as.character(ws[x,"filename"])
+        results$geotag <- as.character(ws[x, "geotag"])
       } else {
         # Read in the subsequent lists and set variable types
         tmp <- read_excel(file.path(path,filename),
-                          sheet = "Complete responses")
+                          sheet = ws_sheet)
         tmp$tag <- as.character(ws[x,"tag"])
         tmp$date <- as.character(ws[x,"date"])
         tmp$source <- as.character(ws[x,"filename"])
+        tmp$geotag <- as.character(ws[x, "geotag"])
         # Add to master dataframe
         results <- bind_rows(results,tmp)
         rm(tmp)
@@ -54,8 +53,11 @@ read_data_from_ws <- function (ws,standardizer_file,standardizer_sheet="Q1") {
     }
   }
   ## standardize
-  
-  results %>%
+  if ( standardize == TRUE ) {
+    # read in the standardizer
+    standardize_Q1 <- read_excel(standardizer_file,
+                                 sheet = standardizer_sheet)
+    results %>%
     rename(rt_Q1_ms = `Response Time #1 (ms)`)   %>%
     # recode French to English, Canada to US to generic
     left_join(standardize_Q1) %>%
@@ -66,9 +68,9 @@ read_data_from_ws <- function (ws,standardizer_file,standardizer_sheet="Q1") {
                                        "more than 6 months",
                                        "My state/province has not implemented such rules."))) %>%
     select(-Q1_std) -> results.std
-  
-  
-  
+  } else {
+    results -> results.std
+  }
   
   return(results.std)
 }

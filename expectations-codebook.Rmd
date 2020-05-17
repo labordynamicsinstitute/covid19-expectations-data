@@ -4,10 +4,6 @@ author: "Fabian Lange, Lars Vilhuber"
 date: "`r Sys.Date()`"
 always_allow_html: true
 output:
-  pdf_document:
-    includes:
-      in_header: _includes/header.tex
-    toc: yes
   html_document: 
     includes:
       before_body: _includes/header.html
@@ -18,6 +14,10 @@ output:
     toc_float: yes
     df_print: paged
     lib_dir: libs
+  pdf_document:
+    includes:
+      in_header: _includes/header.tex
+    toc: yes
 editor_options:
   chunk_output_type: console
 bibliography: from_zotero.bib
@@ -164,7 +164,7 @@ ws.with.dates %>%
 
 #### Q1: Answer to primary question {.tabset .tabset-fade}
 
-This field will differ across the two types of files, geography, and languages. A consolidated (standardized) distribution is shown below, using the [standardizer mapping](`r str_remove(standardizer_file,paste0(basepath,"/"))`).
+This field captures the answer to the [sole question of each survey](#question-type), where answers differ across geographic scope (`geotag`), and languages. A consolidated (standardized) distribution is shown below, using the [standardizer mapping](`r str_remove(standardizer_file,paste0(basepath,"/"))`).
 
 ##### Standardized distribution
 
@@ -245,6 +245,34 @@ print.part(ds=tmp,tagselect = "businesses",geo = "us",lang = "en")
 print.part(ds=tmp,tagselect = "people",geo = "us",lang = "en")
 ```
 
+#### Question type {.tabset .tabset-fade}
+
+The actual question asked is encoded in the `tag` variable on [normalized files](#normalized-files), and differs by [geographic target](#geographic-target) (`geotag`). On the original files, geographic target is not identifiable except through the file name, and the question text is on the "Overview" tab. On the [normalized files](#normalized-files), the variables `tag` and `geotag` allow to map back to the actual question:
+
+```{r question_text,include=FALSE,cache=FALSE}
+# this creates the mapping of questions to geotag and tag
+source(file.path(programs,"read_clean_questions.R"), echo = TRUE, local=FALSE)
+```
+
+
+```{r question_table,cache=FALSE}
+questions.tags %>% datatable()
+```
+
+##### Geographic target
+
+Encoded in `geotag` on [normalized files](#normalized-files), and specifies the two-letter geocode (country or postal abbreviation) as targeted on the Google Survey platform. Note: `geotag` = `qc` also identifies the surveys that used the app.
+
+```{r details_geotag}
+tabulate.var(geotag) %>% kable()
+```
+
+
+##### Notes
+
+- in Week 1 (2020-04-24), we ran  a French-language app survey geo-targeted for Canada, and another one targeted at Québec only. In subsequent weeks, we ran the French-language app survey only in Québec.
+- in Week 3 (2020-05-10), we ran a supplementary web survey geo-targeted at New York State.
+
 
 
 #### Age
@@ -261,7 +289,7 @@ tabulate.var(Gender) %>% kable()
 
 #### Geography {.tabset .tabset-fade}
 
-Geography is as coded by Google Surveys. Precision may vary, having country, region, province, and sometimes city.
+Geography is as coded by Google Surveys. Precision may vary, having country, region, province, and sometimes city. Note that this may be different from the [targeted geography](#geographic-target).
 
 
 ##### Detailed geography

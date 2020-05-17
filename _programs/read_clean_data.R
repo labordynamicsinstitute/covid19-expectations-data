@@ -47,7 +47,7 @@ can_geocodes_file <- file.path(basepath,"auxiliary",statcan_geocodes$file)
 can_geocodes <- read_excel(can_geocodes_file,sheet = "Codes")
 
 results.tmp <- left_join(results,
-                      ws.with.dates %>% select(filename,geotag,language,begintime,endtime,begindate,enddate),
+                      ws.with.dates %>% select(filename,language,begintime,endtime,begindate,enddate),
                       by=c("source" = "filename")) %>%
   separate(Geography,c("Country","Region","State/Province","City"),
            sep="-",remove=FALSE,fill="right") %>%
