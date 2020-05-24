@@ -32,4 +32,15 @@ statcan_geocodes <- tibble::tibble(
   file = "statcan_regions_2011_table8.xlsx")
 
 # standardizer mapping
-standardizer_file <- file.path(basepath,"auxiliary","standardize_values.xlsx")
+standardizer_file <- file.path(auxiliary,"standardize_values.xlsx")
+
+## Census API
+## The Census API key for tis project is stored in a file not versioned by Git
+## If running this by non-original authors, you will need to go through the API key setup described here: https://cran.r-project.org/web/packages/censusapi/vignettes/getting-started.html
+
+if ( file.exists(file.path(basepath,"census_api_key.R"))) {
+  source(file.path(basepath,"census_api_key.R"),echo=FALSE)
+} else {
+  warning("Need CENSUS API key")
+}
+
