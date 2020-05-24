@@ -319,10 +319,10 @@ tabulate.var(Region,df=geo) %>% datatable(autoHideNavigation = TRUE)
 
 ##### States/Province
 
-States and provinces are codes as two-letter postal abbreviation on the original data files. On derived files, `geonum`  contains the numeric FIPS or [province code](`r statcan_geocodes$url`) (coded as character to preserve leading zeros), and as a full name (`geoname`). Note that the Google-provided `Region` often, but not always corresponds to a state or province, whereas `State/Province`, `geonum`, `geoname` always correspond to state/province.
+States and provinces are codes as two-letter postal abbreviation on the original data files. On derived files, `geonum`  contains the numeric FIPS or [province code](`r statcan_geocodes$url`) (coded as character to preserve leading zeros), and as a full name (`geoname`). Note that the Google-provided `Region` often, but not always corresponds to a state or province, whereas `State_Province`, `geonum`, `geoname` always correspond to state/province.
 
 ```{r details_state_province}
-tabulate.var(`State/Province`,df=geo) %>% datatable(autoHideNavigation = TRUE)
+tabulate.var(`State_Province`,df=geo) %>% datatable(autoHideNavigation = TRUE)
 ```
 
 ##### City

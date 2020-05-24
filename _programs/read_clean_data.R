@@ -42,29 +42,29 @@ dates.final.end <- pull(dates.final,enddate)
 ws.with.dates <- left_join(ws,dates.by.file,by=c("filename" = "source"))
 
 # standardize, and geocode
-can_geocodes_file <- file.path(basepath,"auxiliary",statcan_geocodes$file)
+can_geocodes_file <- file.path(auxiliary,statcan_geocodes$file)
 
 can_geocodes <- read_excel(can_geocodes_file,sheet = "Codes")
 
 results.tmp <- left_join(results,
                       ws.with.dates %>% select(filename,language,begintime,endtime,begindate,enddate),
                       by=c("source" = "filename")) %>%
-  separate(Geography,c("Country","Region","State/Province","City"),
+  separate(Geography,c("Country","Region","State_Province","City"),
            sep="-",remove=FALSE,fill="right") %>%
-  replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State/Province` = "ZZ Unknown"))
+  replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State_Province` = "ZZ Unknown"))
 
 # geocoding
-geocodes_us <- results.tmp %>% filter(Country == "US") %>% select(`State/Province`) %>% distinct()
-geocodes_us$geonum <- usmap::fips(geocodes_us$`State/Province`)
+geocodes_us <- results.tmp %>% filter(Country == "US") %>% select(`State_Province`) %>% distinct()
+geocodes_us$geonum <- usmap::fips(geocodes_us$`State_Province`)
 geocodes_us$geoname <- usmap::fips_info(geocodes_us$geonum)$full
 
-geocodes_ca <- results.tmp %>% filter(Country == "CA") %>% select(`State/Province`) %>% distinct() %>%
-  left_join(can_geocodes,by=c(`State/Province` = "Alpha")) %>% 
-  select(`State/Province`,geonum = SGC,geoname = "Province/Territory") %>%
+geocodes_ca <- results.tmp %>% filter(Country == "CA") %>% select(`State_Province`) %>% distinct() %>%
+  left_join(can_geocodes,by=c(`State_Province` = "Alpha")) %>% 
+  select(`State_Province`,geonum = SGC,geoname = "Province/Territory") %>%
   mutate(geonum = as.character(geonum))
 
-results.final <- left_join(results.tmp,geocodes_us,by=c("State/Province")) %>%
-                 left_join(geocodes_ca,by=c("State/Province")) %>%
+results.final <- left_join(results.tmp,geocodes_us,by=c("State_Province")) %>%
+                 left_join(geocodes_ca,by=c("State_Province")) %>%
                  mutate(geonum = if_else(Country == "US",geonum.x,geonum.y),
                         geoname= if_else(Country == "US",geoname.x,geoname.y)) %>%
                 select(-geonum.x,-geonum.y,-geoname.x,-geoname.y)
