@@ -23,12 +23,18 @@ ws <- read_ws(directory = gcsdir,basepath = basepath)
 ws <- bind_rows(ws,read_ws(directory = temporary,basepath = basepath,temporary = TRUE))
 
 # read in and standardize
-results <- read_data_from_ws(ws,standardizer_file = standardizer_file)
-
+results <- read_data_from_ws(ws,standardizer_file = standardizer_file) %>%
+  # manually fixing variable names
+  rename("User_ID" = "User ID",
+         "Time_UTC" = "Time (UTC)",
+         "Survey_Completion" =  "Survey Completion",
+         "Publisher_Category" = "Publisher Category",
+         "Question_1_Answer" = "Question #1 Answer")
+  
 # get metadata 
 results %>% 
   group_by(source) %>%
-  summarize(begintime=min(`Time (UTC)`),endtime=max(`Time (UTC)`)) %>%
+  summarize(begintime=min(`Time_UTC`),endtime=max(`Time_UTC`)) %>%
   mutate(begindate=as.Date(begintime),enddate=as.Date(endtime)) -> dates.by.file
 
 dates.by.file %>% 

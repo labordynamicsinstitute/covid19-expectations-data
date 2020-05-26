@@ -188,7 +188,7 @@ results.final %>%
 tmp <- results.final %>%
   # insert Québec into Canada
   mutate(geotag = recode(geotag,"qc" = "canada")) %>%
-  group_by(tag,geotag,language,`Question #1 Answer`) %>%
+  group_by(tag,geotag,language,`Question_1_Answer`) %>%
   summarise(count=n()) %>% 
   group_by(tag,geotag,language) %>%
   mutate(percent = count / sum(count)) 
@@ -358,14 +358,14 @@ detach("package:summarytools",unload=TRUE)
 #### Publisher Category
 
 ```{r details_publisher}
-tabulate.var(`Publisher Category`) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't')) 
+tabulate.var(`Publisher_Category`) %>% datatable(autoHideNavigation = TRUE,options = list(dom = 't')) 
 ```
 
 #### Not tabulated
 
-- `User ID`
-- `Time (UTC)`
-- `Survey Completion`
+- `User_ID`
+- `Time_UTC`
+- `Survey_Completion`
 
 ### Data structure
 

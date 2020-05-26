@@ -5,7 +5,7 @@ source(file.path(programs,"global-libraries.R"),echo=FALSE)
 mysave <- function(object,filename,path=outputs,skipdta=FALSE,skipcsv=FALSE) {
   saveRDS(object,file=file.path(path,paste0(filename,".Rds")))
   if ( skipdta == FALSE ) {
-  save.dta13(object,file=file.path(path,paste0(filename,".dta")))
+  write_dta(object,path=file.path(path,paste0(filename,".dta")))
   }
   if ( skipcsv == FALSE ) {
     write_csv(object,path=file.path(path,paste0(filename,".csv")))
