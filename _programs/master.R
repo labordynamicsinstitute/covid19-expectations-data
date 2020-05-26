@@ -27,6 +27,7 @@ if (length(args)>0) {
      system("apt-get install -y r-cran-summarytools ")
      system("apt-get install -y r-cran-rgdal ")
      system("apt-get install -y r-cran-haven")
+     system("apt-get install -y r-cran-sf")
     }
   }
 
