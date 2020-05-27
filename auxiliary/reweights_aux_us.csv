@@ -1,4 +1,4 @@
-Country,geonum,gender,age_collapsed,estimate,pweight
+Country,geonum,gender,age_collapsed,count,pweight
 US,01,Female,18-24,227430,8.960456374879712e-4
 US,01,Female,25-34,324711,0.001279320560147547
 US,01,Female,35-44,307026,0.0012096438811739078

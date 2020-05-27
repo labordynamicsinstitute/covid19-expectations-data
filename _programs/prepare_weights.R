@@ -82,7 +82,7 @@ acs1data <- acs1data.raw  %>%
   
 acs1data.counts <- acs1data %>%
   group_by(geonum,gender,age_collapsed) %>%
-  summarize(estimate=sum(estimate)) %>%
+  summarize(count=sum(estimate)) %>%
   ungroup()
 
 ## get totals by state, and for the country
@@ -90,19 +90,19 @@ acs1data.control <- acs1data.counts %>% filter(age_collapsed == "All" & gender =
 acs1data.stpop18plus <- acs1data.counts %>%
   filter(age_collapsed != "All") %>%
   group_by(geonum,gender) %>%
-  summarize(estimate=sum(estimate)) %>%
+  summarize(count=sum(count)) %>%
   mutate(age_collapsed = "18+") %>%
   ungroup()
 
 acs1data.uspop18plus <- acs1data.stpop18plus %>% 
-  summarize(estimate = sum(estimate)) %>% pull(estimate)
+  summarize(count = sum(count)) %>% pull(count)
 
 ## now compute the weights
 acs1data.weights <- acs1data.counts %>%
   filter(age_collapsed != "All") %>%
-  mutate(pweight = estimate/acs1data.uspop18plus) %>%
+  mutate(pweight = count/acs1data.uspop18plus) %>%
   mutate(Country = "US") %>%
-  select(Country,geonum,gender,age_collapsed,estimate,pweight)
+  select(Country,geonum,gender,age_collapsed,count,pweight)
 
 
 ### Test that this is true
@@ -113,7 +113,6 @@ assertthat::assert_that(control==1,msg = "Warning: something went wrong when com
 ## save those files
 
 mysave(acs1data.weights,path = auxiliary,filename = "reweights_aux_us")
-
 
 
 ## Read LFS / Canadian Census data
