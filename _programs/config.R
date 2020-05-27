@@ -34,6 +34,11 @@ statcan_geocodes <- tibble::tibble(
   date = "2020-05-12",
   file = "statcan_regions_2011_table8.xlsx")
 
+statcan_pop <- tibble::tibble(
+  url = "https://www150.statcan.gc.ca/n1/tbl/csv/",
+  date = "2020-05-26",
+  file = "17100005-eng.zip" )
+
 # standardizer mapping
 standardizer_file <- file.path(auxiliary,"standardize_values.xlsx")
 

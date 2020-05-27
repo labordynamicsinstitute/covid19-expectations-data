@@ -117,3 +117,11 @@ mysave(acs1data.weights,path = auxiliary,filename = "reweights_aux_us")
 
 
 ## Read LFS / Canadian Census data
+
+download.file(paste0(statcan_pop$url,statcan_pop$file),
+              destfile = file.path(temporary,statcan_pop$file))
+#unzip(zipfile = file.path(temporary,statcan_pop$file),list = TRUE)
+unzip(zipfile = file.path(temporary,statcan_pop$file),files = "17100005.csv",exdir = temporary)
+capopest.raw <- read_csv(file.path(temporary,"17100005.csv")) %>% filter(REF_DATE == 2019)
+
+STOPPED HERE
