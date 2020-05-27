@@ -97,6 +97,8 @@ acs1data.stpop18plus <- acs1data.counts %>%
 acs1data.uspop18plus <- acs1data.stpop18plus %>% 
   summarize(count = sum(count)) %>% pull(count)
 
+print(paste0("The US population age 18+ is ",format(acs1data.uspop18plus,big.mark = ",")))
+
 ## now compute the weights
 acs1data.weights <- acs1data.counts %>%
   filter(age_collapsed != "All") %>%
@@ -116,6 +118,7 @@ assertthat::assert_that(control==1,msg = "Warning: something went wrong when com
 mysave(acs1data.weights,path = auxiliary,filename = "reweights_aux_us")
 
 
+##----------------------------------------------------------------------
 ## Read LFS / Canadian Census data
 
 download.file(paste0(statcan_pop$url,statcan_pop$file),
@@ -124,4 +127,68 @@ download.file(paste0(statcan_pop$url,statcan_pop$file),
 unzip(zipfile = file.path(temporary,statcan_pop$file),files = "17100005.csv",exdir = temporary)
 capopest.raw <- read_csv(file.path(temporary,"17100005.csv")) %>% filter(REF_DATE == 2019)
 
-STOPPED HERE
+# get geocodes
+can_geocodes_file <- file.path(auxiliary,statcan_geocodes$file)
+
+can_geocodes <- read_excel(can_geocodes_file,sheet = "Codes") %>% 
+  rename( State_Province = Alpha,
+          geonum = SGC) 
+
+# recode table for age
+
+# Run manually:
+#capopest.raw %>% group_by(`Age group`) %>% 
+#  summarize(n=n()) -> capopest.agegroups
+# write_csv(capopest.agegroups,file.path(auxiliary,"aggregage_agegrp_ca.csv"))
+# capopest.agegroups %>% filter(str_detect(`Age group`,"to")) %>% pull(`Age group`)
+
+recode_age_ca <- read_excel(file.path(auxiliary,"aggregage_agegrp_ca.xlsx"))
+
+
+# computations
+
+capopest <- capopest.raw %>%
+  filter(Sex %in% c("Females","Males"),
+         !( GEO %in% "Canada" )) %>%
+  mutate(gender = str_replace(Sex,"s$",""),
+         estimate = as.integer(VALUE)) %>%
+  select(GEO,estimate,gender,"Age group") %>%
+  left_join(can_geocodes,by=c("GEO" = "Province/Territory")) %>%
+  left_join(recode_age_ca) %>%
+  filter(age_collapsed != "drop")
+
+
+capopest.counts <- capopest %>%
+  group_by(geonum,gender,age_collapsed) %>%
+  summarize(count=sum(estimate)) %>%
+  ungroup()
+
+capopest.prpop18plus <- capopest.counts %>%
+  filter(age_collapsed != "All") %>%
+  group_by(geonum,gender) %>%
+  summarize(count=sum(count)) %>%
+  mutate(age_collapsed = "18+") %>%
+  ungroup()
+
+capopest.capop18plus <- capopest.prpop18plus %>% 
+  summarize(count = sum(count)) %>% pull(count)
+
+
+print(paste0("The CA population age 18+ is ",format(capopest.capop18plus,big.mark = ",")))
+
+
+## now compute the weights
+capopest.weights <- capopest.counts %>%
+  filter(age_collapsed != "All") %>%
+  mutate(pweight = count/capopest.capop18plus) %>%
+  mutate(Country = "CA") %>%
+  select(Country,geonum,gender,age_collapsed,count,pweight)
+
+### Test that this is true
+
+control <- capopest.weights %>% summarize(control=sum(pweight)) %>% pull(control)
+assertthat::assert_that(control==1,msg = "Warning: something went wrong when computing weights")
+
+## save those files
+
+mysave(capopest.weights,path = auxiliary,filename = "reweights_aux_ca")
