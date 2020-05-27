@@ -103,6 +103,7 @@ acs1data.weights <- acs1data.counts %>%
   mutate(pweight = count/acs1data.uspop18plus) %>%
   mutate(Country = "US") %>%
   select(Country,geonum,gender,age_collapsed,count,pweight)
+acs1data.weights$state <- usmap::fips_info(acs1data.weights$geonum)$abbr
 
 
 ### Test that this is true
