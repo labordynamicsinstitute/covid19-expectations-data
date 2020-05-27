@@ -99,13 +99,18 @@ acs1data.uspop18plus <- acs1data.stpop18plus %>%
 
 print(paste0("The US population age 18+ is ",format(acs1data.uspop18plus,big.mark = ",")))
 
+## add the state variable
+geocodes_us <- acs1data.counts %>% select(`geonum`) %>% distinct()
+geocodes_us$state <- usmap::fips_info(geocodes_us$geonum)$abbr
+
 ## now compute the weights
 acs1data.weights <- acs1data.counts %>%
   filter(age_collapsed != "All") %>%
   mutate(pweight = count/acs1data.uspop18plus) %>%
   mutate(Country = "US") %>%
-  select(Country,geonum,gender,age_collapsed,count,pweight)
-acs1data.weights$state <- usmap::fips_info(acs1data.weights$geonum)$abbr
+  select(Country,geonum,gender,age_collapsed,count,pweight) %>%
+  left_join(geocodes_us)
+
 
 
 ### Test that this is true
