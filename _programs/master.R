@@ -8,8 +8,9 @@ args = commandArgs(trailingOnly=TRUE)
 
 if (length(args)>0) {
   if ( args[1] == "ubuntu" ) {
-     system("apt-get update")
-     system("apt-get install -y libcurl4-openssl-dev libxml2-dev gdal-abi-2-4-0 libgdal20 libproj13")
+    system("apt-get update")
+    system("apt-get upgrade")
+    system("apt-get install -y libcurl4-openssl-dev libxml2-dev libgdal-dev libgdal20 libudunits2-dev")
      system("apt-get install -y texlive-latex-recommended")
      system("apt-get install -y texlive-fonts-recommended")
      system("apt-get install -y texlive-latex-extra texlive-pictures")
@@ -17,7 +18,7 @@ if (length(args)>0) {
      system("apt-get install -y r-cran-rprojroot r-cran-tidyverse")
      system("apt-get install -y r-cran-readxl r-cran-devtools r-cran-readstata13 ")
      system("apt-get install -y r-cran-jsonlite r-cran-shiny r-cran-freetype r-cran-extrafont ")
-     system("apt-get install -y r-cran-mapproj r-cran-rgdal r-cran-sf")
+     system("apt-get install -y r-cran-mapproj")
      system("apt-get install -y r-cran-ggthemes ")
      system("apt-get install -y r-cran-summarytools ")
      system("apt-get install -y r-cran-haven")
