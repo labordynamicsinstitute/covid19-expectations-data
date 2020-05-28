@@ -66,7 +66,7 @@ Data from a survey of consumer expectations
 
 ## Description
 
-From April 24, 2020, Fabian Lange and Lars Vilhuber will conduct the survey "Uncertainty in COVID-19 times". The survey is a single-question survey focusing on people's anticipation about social distancing rules and firm closures during the 2020 COVID-19 health crisis. 
+Since April 24, 2020, [Fabian Lange](http://www.fabianlange.ca/) and [Lars Vilhuber](https://lars.vilhuber.com) have been conducting the survey "Uncertainty in COVID-19 times". The survey is a single-question survey focusing on people's anticipation about social distancing rules and firm closures during the 2020 COVID-19 health crisis. 
 
 We believe that this information is not otherwise available in a reliable and timely fashion. The information should be usable by policy-makers and researchers, to be included in models of future developments of society and the economy.
 
@@ -125,6 +125,19 @@ enframe(list.files(derived,"*")) %>%
   select(Files) %>% kable()
 ```
 
+### Auxiliary files
+
+We provide additional files that were either used or generated in the process of data cleaning, in particular for the reweighting. (explanations to come)
+
+```{r listaux,results='asis'}
+
+enframe(list.files(auxiliary,"*")) %>% 
+    mutate(filename=value,path=auxiliary) %>% 
+    mutate(showpath=str_remove(path,paste0(basepath,"/"))) %>% 
+  select(showpath,filename) %>% 
+  mutate(Files=paste0("[",filename,"](",file.path(showpath,filename),")"))  %>%
+  select(Files) %>% kable()
+```
 ### Temporary files
 
 Temporary files may be made available if a survey has not yet completed, but data are already available. 
