@@ -86,11 +86,20 @@ get_geo_us <- function(download=FALSE) {
   }
   cb_geocodes_file <- file.path(auxiliary,cb_geocodes$file)
 
-  cb_geocodes.raw <- read_excel(cb_geocodes_file,skip = 4) 
+  cb_geocodes.raw <- tibble(read_excel(cb_geocodes_file,skip = 4))
+  
+  # fips_info is weird
+  tmp <- cb_geocodes.raw %>% select(`State (FIPS)`) %>% distinct() %>% 
+    filter(`State (FIPS)`!="00") 
+  fips_abbr <-  usmap::fips_info(tmp$`State (FIPS)`)
+  
   cb_divisions <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`=="00") %>% 
     select(Division,Division_name = Name)
+  
   geocodes_us <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`!="00") %>%
-    left_join(cb_divisions) %>% rename(geonum = `State (FIPS)`)
-  geocodes_us$state <- usmap::fips_info(geocodes_us$geonum)$abbr
+    left_join(cb_divisions) %>% 
+    left_join(fips_abbr,by=c("State (FIPS)" = "fips" )) %>%
+    rename(geonum = `State (FIPS)`,state=abbr) %>% select(-full)
+  
   return(geocodes_us)
 }
