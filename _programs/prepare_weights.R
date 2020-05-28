@@ -5,6 +5,7 @@
 source(file.path(rprojroot::find_root(rprojroot::has_file("pathconfig.R")),"pathconfig.R"),echo=FALSE)
 source(file.path(programs,"config.R"), echo=FALSE)
 source(file.path(programs,"global-libraries.R"), echo=FALSE)
+source(file.path(programs,"common-functions.R"),echo=TRUE)
 
 # We process these only if the files are NOT there (explicit caching)
 
@@ -72,18 +73,7 @@ recode_age <- c(
 
 # We need to attach Census divisions - note: there could be a better ACS1 file, but didn't look
 
-# get geocodes
-download.file(paste0(cb_geocodes$url,cb_geocodes$file),
-              destfile = file.path(auxiliary,cb_geocodes$file))
-cb_geocodes_file <- file.path(auxiliary,cb_geocodes$file)
-
-cb_geocodes.raw <- read_excel(cb_geocodes_file,skip = 4) 
-cb_divisions <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`=="00") %>% 
-  select(Division,Division_name = Name)
-geocodes_us <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`!="00") %>%
-  left_join(cb_divisions) %>% rename(geonum = `State (FIPS)`)
-geocodes_us$state <- usmap::fips_info(geocodes_us$geonum)$abbr
-
+geocodes_us <- get_geo_us()
 
 # Compute stuff
 

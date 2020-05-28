@@ -74,3 +74,23 @@ read_data_from_ws <- function (ws,ws_sheet="Complete responses",standardize=TRUE
   
   return(results.std)
 }
+
+
+## Get geocodes files: US
+
+get_geo_us <- function(download=FALSE) {
+  # get geocodes
+  if ( download ) {
+  download.file(paste0(cb_geocodes$url,cb_geocodes$file),
+              destfile = file.path(auxiliary,cb_geocodes$file))
+  }
+  cb_geocodes_file <- file.path(auxiliary,cb_geocodes$file)
+
+  cb_geocodes.raw <- read_excel(cb_geocodes_file,skip = 4) 
+  cb_divisions <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`=="00") %>% 
+    select(Division,Division_name = Name)
+  geocodes_us <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`!="00") %>%
+    left_join(cb_divisions) %>% rename(geonum = `State (FIPS)`)
+  geocodes_us$state <- usmap::fips_info(geocodes_us$geonum)$abbr
+  return(geocodes_us)
+}

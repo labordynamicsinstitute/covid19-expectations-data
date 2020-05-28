@@ -60,9 +60,13 @@ results.tmp <- left_join(results,
   replace_na(list(City = "ZZ Unknown",Region = "ZZ Unknown",`State_Province` = "ZZ Unknown"))
 
 # geocoding
-geocodes_us <- results.tmp %>% filter(Country == "US") %>% select(`State_Province`) %>% distinct()
-geocodes_us$geonum <- usmap::fips(geocodes_us$`State_Province`)
-geocodes_us$geoname <- usmap::fips_info(geocodes_us$geonum)$full
+#geocodes_us <- results.tmp %>% filter(Country == "US") %>% select(`State_Province`) %>% distinct()
+#geocodes_us$geonum <- usmap::fips(geocodes_us$`State_Province`)
+#geocodes_us$geoname <- usmap::fips_info(geocodes_us$geonum)$full
+
+# We need to attach Census divisions - note: there could be a better ACS1 file, but didn't look
+
+geocodes_us <- get_geo_us() %>% select(State_Province = state,geonum,geoname = Name,Division,Division_name)
 
 geocodes_ca <- results.tmp %>% filter(Country == "CA") %>% select(`State_Province`) %>% distinct() %>%
   left_join(can_geocodes,by=c(`State_Province` = "Alpha")) %>% 
