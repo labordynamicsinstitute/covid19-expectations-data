@@ -39,6 +39,12 @@ statcan_pop <- tibble::tibble(
   date = "2020-05-26",
   file = "17100005-eng.zip" )
 
+cb_geocodes <- tibble::tibble(
+  url = "https://www2.census.gov/programs-surveys/popest/geographies/2017/",
+  date = "2020-05-28",
+  file = "state-geocodes-v2017.xlsx"
+)
+
 # standardizer mapping
 standardizer_file <- file.path(auxiliary,"standardize_values.xlsx")
 

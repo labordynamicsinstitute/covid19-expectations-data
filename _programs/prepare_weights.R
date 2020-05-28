@@ -70,6 +70,23 @@ recode_age <- c(
   "85 years and over"= "65+"
 )
 
+# We need to attach Census divisions - note: there could be a better ACS1 file, but didn't look
+
+# get geocodes
+download.file(paste0(cb_geocodes$url,cb_geocodes$file),
+              destfile = file.path(auxiliary,cb_geocodes$file))
+cb_geocodes_file <- file.path(auxiliary,cb_geocodes$file)
+
+cb_geocodes.raw <- read_excel(cb_geocodes_file,skip = 4) 
+cb_divisions <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`=="00") %>% 
+  select(Division,Division_name = Name)
+geocodes_us <- cb_geocodes.raw %>% filter(Division != "0",`State (FIPS)`!="00") %>%
+  left_join(cb_divisions) %>% rename(geonum = `State (FIPS)`)
+geocodes_us$state <- usmap::fips_info(geocodes_us$geonum)$abbr
+
+
+# Compute stuff
+
 acs1data <- acs1data.raw  %>%
   pivot_longer(cols = starts_with("B01"),names_to = "variable",values_to = "estimate") %>%
   rename(geonum = state) %>%
@@ -99,9 +116,6 @@ acs1data.uspop18plus <- acs1data.stpop18plus %>%
 
 print(paste0("The US population age 18+ is ",format(acs1data.uspop18plus,big.mark = ",")))
 
-## add the state variable
-geocodes_us <- acs1data.counts %>% select(`geonum`) %>% distinct()
-geocodes_us$state <- usmap::fips_info(geocodes_us$geonum)$abbr
 
 ## now compute the weights
 acs1data.weights <- acs1data.counts %>%
