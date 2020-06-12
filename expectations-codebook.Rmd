@@ -27,6 +27,7 @@ bibliography: from_zotero.bib
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
 knitr::opts_chunk$set(cache = TRUE)
+options(dplyr.summarise.inform = FALSE)
 ```
 ```{r config_libs,include=FALSE,message=FALSE,cache=FALSE}
 source(file.path(rprojroot::find_root(rprojroot::has_file("pathconfig.R")),"pathconfig.R"),echo=TRUE)

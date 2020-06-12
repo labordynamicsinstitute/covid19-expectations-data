@@ -24,7 +24,7 @@ pkgTest <- function(x,try=FALSE)
 global.libraries <- c("tidyverse","devtools","rprojroot","ggplot2","readxl","haven",
                       "knitr","ggthemes","jsonlite","DT","usmap","tidycensus")
 
-optional.libraries <- c("summarytools")
+optional.libraries <- c("summarytools","maptools","rgdal")
 
 results <- sapply(as.list(global.libraries), pkgTest)
 results <- sapply(as.list(optional.libraries), pkgTest,try=TRUE)
