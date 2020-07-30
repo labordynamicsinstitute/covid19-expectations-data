@@ -1,5 +1,4 @@
 ![Update codebook](https://github.com/labordynamicsinstitute/covid19-expectations-data/workflows/Update%20codebook/badge.svg)
-
 [![DOI](https://zenodo.org/badge/259093155.svg)](https://zenodo.org/badge/latestdoi/259093155)
 
 # Uncertainty in times of COVID-19: Raw survey data
