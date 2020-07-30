@@ -33,4 +33,5 @@ baseurl <- "https://labordynamicsinstitute.github.io/"
 gitname <- "covid19-expectations-data"
 publicurl     <- file.path(baseurl,gitname)
 derivedfile     <- file.path(derived,"expectations")
+publicdoi <- "https://doi.org/10.5281/zenodo.3966534"
 
