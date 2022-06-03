@@ -22,7 +22,7 @@ pkgTest <- function(x,try=FALSE)
 }
 
 global.libraries <- c("tidyverse","devtools","rprojroot","ggplot2","readxl","haven",
-                      "knitr","ggthemes","jsonlite","DT","usmap","tidycensus")
+                      "knitr","ggthemes","jsonlite","DT","usmap","tidycensus","pwr")
 
 optional.libraries <- c("summarytools","maptools","rgdal")
 

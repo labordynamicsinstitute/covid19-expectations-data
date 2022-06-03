@@ -11,8 +11,9 @@ output:
     toc_float: yes
     df_print: paged
     lib_dir: libs
-  pdf_document:
+  pdf_document: 
     toc: yes
+    keep_tex: yes
 editor_options:
   chunk_output_type: console
 ---
